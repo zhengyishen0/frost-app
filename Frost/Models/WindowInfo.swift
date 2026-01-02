@@ -1,9 +1,9 @@
 //
 //  WindowInfo.swift
-//  Dimmer Bar
+//  Frost
 //
-//  Created by phucld on 1/7/20.
-//  Copyright © 2020 Dwarves Foundation. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 
 import Foundation

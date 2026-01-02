@@ -1,7 +1,7 @@
 //
 //  BlurManager.swift
 //
-//  Copyright © 2025 ZhengyiShen. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 //  Redesigned for Frost: unified blur layer with elegant hole animation.
 //

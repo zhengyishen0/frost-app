@@ -1,9 +1,9 @@
 //
 //  String+Extension.swift
-//  Blurred
+//  Frost
 //
-//  Created by Peter Luo on 2020/6/16.
-//  Copyright © 2020 Dwarves Foundation. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 
 import Foundation

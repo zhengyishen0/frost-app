@@ -1,9 +1,9 @@
 //
 //  AppDelegate.swift
-//  dimmerBarLauncher
+//  FrostLauncher
 //
-//  Created by phucld on 1/7/20.
-//  Copyright © 2020 Dwarves Foundation. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 
 import Cocoa
@@ -17,7 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        let mainAppIdentifier = "foundation.dwarves.blurred"
+        let mainAppIdentifier = "com.zhengyishen.frost"
         let runningApps = NSWorkspace.shared.runningApplications
         let isRunning = !runningApps.filter { $0.bundleIdentifier == mainAppIdentifier }.isEmpty
         
@@ -31,7 +31,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             var components = path.pathComponents
             components.removeLast(3)
             components.append("MacOS")
-            let appName = "Blurred"
+            let appName = "Frost"
             components.append(appName) //main app name
             let newPath = NSString.path(withComponents: components)
             NSWorkspace.shared.launchApplication(newPath)

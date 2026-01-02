@@ -2,8 +2,8 @@
 //  AppDelegate.swift
 //  Frost
 //
-//  Original by phucld on 12/17/19.
-//  Copyright © 2019 Dwarves Foundation. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 //  Updated for Frost.
 //

@@ -1,15 +1,15 @@
 
-/* Class = "NSMenuItem"; title = "Blurred"; ObjectID = "1Xt-HY-uBw"; */
-"1Xt-HY-uBw.title" = "Blurred";
+/* Class = "NSMenuItem"; title = "Frost"; ObjectID = "1Xt-HY-uBw"; */
+"1Xt-HY-uBw.title" = "Frost";
 
-/* Class = "NSMenuItem"; title = "Quit Dimmer Bar"; ObjectID = "4sb-4s-VLi"; */
-"4sb-4s-VLi.title" = "Quit Dimmer Bar";
+/* Class = "NSMenuItem"; title = "Quit Frost"; ObjectID = "4sb-4s-VLi"; */
+"4sb-4s-VLi.title" = "Quit Frost";
 
 /* Class = "NSMenuItem"; title = "Edit"; ObjectID = "5QF-Oa-p0T"; */
 "5QF-Oa-p0T.title" = "Edit";
 
-/* Class = "NSMenuItem"; title = "About Dimmer Bar"; ObjectID = "5kV-Vb-QxS"; */
-"5kV-Vb-QxS.title" = "About Dimmer Bar";
+/* Class = "NSMenuItem"; title = "About Frost"; ObjectID = "5kV-Vb-QxS"; */
+"5kV-Vb-QxS.title" = "About Frost";
 
 /* Class = "NSWindow"; title = "General"; ObjectID = "9fi-09-O47"; */
 "9fi-09-O47.title" = "General";
@@ -29,8 +29,8 @@
 /* Class = "NSSegmentedCell"; F3F-sa-eQc.ibShadowedLabels[1] = "About"; ObjectID = "F3F-sa-eQc"; */
 "F3F-sa-eQc.ibShadowedLabels[1]" = "About";
 
-/* Class = "NSMenuItem"; title = "Dimmer Bar Help"; ObjectID = "FKE-Sm-Kum"; */
-"FKE-Sm-Kum.title" = "Dimmer Bar Help";
+/* Class = "NSMenuItem"; title = "Frost Help"; ObjectID = "FKE-Sm-Kum"; */
+"FKE-Sm-Kum.title" = "Frost Help";
 
 /* Class = "NSMenuItem"; title = "View"; ObjectID = "H8h-7b-M4v"; */
 "H8h-7b-M4v.title" = "View";
@@ -47,8 +47,8 @@
 /* Class = "NSMenuItem"; title = "Minimize"; ObjectID = "OY7-WF-poV"; */
 "OY7-WF-poV.title" = "Minimize";
 
-/* Class = "NSMenuItem"; title = "Hide Dimmer Bar"; ObjectID = "Olw-nP-bQN"; */
-"Olw-nP-bQN.title" = "Hide Dimmer Bar";
+/* Class = "NSMenuItem"; title = "Hide Frost"; ObjectID = "Olw-nP-bQN"; */
+"Olw-nP-bQN.title" = "Hide Frost";
 
 /* Class = "NSMenuItem"; title = "Zoom"; ObjectID = "R4o-n2-Eq4"; */
 "R4o-n2-Eq4.title" = "Zoom";
@@ -77,8 +77,8 @@
 /* Class = "NSMenuItem"; title = "Format"; ObjectID = "jxT-CU-nIS"; */
 "jxT-CU-nIS.title" = "Format";
 
-/* Class = "NSMenu"; title = "Blurred"; ObjectID = "uQy-DD-JDr"; */
-"uQy-DD-JDr.title" = "Blurred";
+/* Class = "NSMenu"; title = "Frost"; ObjectID = "uQy-DD-JDr"; */
+"uQy-DD-JDr.title" = "Frost";
 
 /* Class = "NSMenuItem"; title = "Help"; ObjectID = "wpr-3q-Mcd"; */
 "wpr-3q-Mcd.title" = "Help";

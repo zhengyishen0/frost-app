@@ -2,8 +2,8 @@
 //  UserDefaults+Extension.swift
 //  Frost
 //
-//  Original by Trung Phan on 1/7/20.
-//  Copyright © 2020 Dwarves Foundation. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 //  Updated for Frost with new settings keys.
 //

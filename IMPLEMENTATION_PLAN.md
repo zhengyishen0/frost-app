@@ -1,12 +1,12 @@
-# Blurred → Monocle Transformation Plan
+# Frost Implementation Plan
 
 ## Overview
 
-Transform the Blurred app from a **dark dimming utility** into a **frosted glass blur focus tool** (Monocle-style).
+Transform the original Blurred app from a **dark dimming utility** into a **frosted glass blur focus tool** (Frost).
 
 ---
 
-## Current Architecture (Blurred)
+## Original Architecture (Blurred)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -33,7 +33,7 @@ Transform the Blurred app from a **dark dimming utility** into a **frosted glass
 
 ---
 
-## Target Architecture (Monocle-style)
+## Frost Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -150,7 +150,7 @@ private func createAmbientBlurWindow(for screen: NSScreen, focusRect: CGRect) ->
 
 ### 3. Cursor Shake Detection
 
-**Concept:** Detect rapid back-and-forth mouse movement (like Monocle's shake-to-toggle).
+**Concept:** Detect rapid back-and-forth mouse movement (shake-to-defrost).
 
 ```swift
 // CursorShakeDetector.swift

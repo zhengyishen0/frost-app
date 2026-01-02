@@ -1,6 +1,6 @@
 ## Privacy Policy
 
-Dwarves Foundation built the Blurred app as an Open Source app. This app is provided by Dwarves Foundation at no cost and is intended for use as is.
+Zhengyi Shen built the Frost app as an Open Source app. This app is provided by Zhengyi Shen at no cost and is intended for use as is.
 
 **Information Collection and Use**
 
@@ -8,4 +8,4 @@ The app does NOT use any third party services that may collect information used 
 
 **Contact Us**
 
-If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at macos@d.foundation.
+If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at https://github.com/zhengyishen/frost-app.

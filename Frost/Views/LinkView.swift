@@ -1,9 +1,9 @@
 //
 //  LinkView.swift
-//  Blurred
+//  Frost
 //
-//  Created by phucld on 3/17/20.
-//  Copyright © 2020 Dwarves Foundation. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 
 import SwiftUI
@@ -37,6 +37,6 @@ struct LinkView: View {
 
 struct LinkView_Previews: PreviewProvider {
     static var previews: some View {
-        LinkView(imageName: "ico_compass", title: "Know more about us", link: "https://dwarves.foundation/apps")
+        LinkView(imageName: "ico_compass", title: "About Frost", link: "https://github.com/zhengyishen/frost-app")
     }
 }

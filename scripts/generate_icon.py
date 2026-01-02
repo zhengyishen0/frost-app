@@ -66,8 +66,8 @@ def create_icon(size):
 def main():
     # Output directory
     script_dir = Path(__file__).parent.parent
-    main_iconset = script_dir / "Blurred" / "Assets.xcassets" / "AppIcon.appiconset"
-    launcher_iconset = script_dir / "BlurredLauncher" / "Assets.xcassets" / "AppIcon.appiconset"
+    main_iconset = script_dir / "Frost" / "Assets.xcassets" / "AppIcon.appiconset"
+    launcher_iconset = script_dir / "FrostLauncher" / "Assets.xcassets" / "AppIcon.appiconset"
 
     sizes = [16, 32, 64, 128, 256, 512, 1024]
 

@@ -1,9 +1,9 @@
 //
 //  GlobalKeyBindPreferences.swift
-//  Blurred
+//  Frost
 //
-//  Created by phucld on 2/19/20.
-//  Copyright © 2020 Dwarves Foundation. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 
 import Foundation

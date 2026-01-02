@@ -2,10 +2,7 @@
 //  StatusBarController.swift
 //  Frost
 //
-//  Original by Trung Phan on 1/7/20.
-//  Copyright © 2020 Dwarves Foundation. All rights reserved.
-//
-//  Simplified for Frost - all settings in menu bar dropdown.
+//  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
 
 import Foundation
@@ -44,6 +41,18 @@ class StatusBarController {
                 frame: CGRect(origin: .zero, size: button.frame.size)
             )
             button.addSubview(swipeView)
+
+            // Set initial opacity based on enabled state
+            let setting = BlurManager.sharedInstance.setting
+            button.alphaValue = setting.isEnabled ? 1.0 : 0.4
+
+            // Update opacity when enabled state changes
+            setting.$isEnabled
+                .receive(on: DispatchQueue.main)
+                .sink { [weak button] isEnabled in
+                    button?.alphaValue = isEnabled ? 1.0 : 0.4
+                }
+                .store(in: &cancellableSet)
         }
         menuStatusItem.menu = createContextMenu()
     }

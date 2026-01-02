@@ -208,7 +208,7 @@
 			dependencies = (
 			);
 			name = FrostLauncher;
-			productName = dimmerBarLauncher;
+			productName = FrostLauncher;
 			productReference = 1EFFF5B52F085083002AF814 /* FrostLauncher.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -229,7 +229,7 @@
 			packageProductDependencies = (
 				085174A023FD2E9700B3B84F /* HotKey */,
 			);
-			productName = "Dimmer Bar";
+			productName = Frost;
 			productReference = 1EFFF5B42F08507B002AF814 /* Frost.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -242,7 +242,7 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1130;
 				LastUpgradeCheck = 2620;
-				ORGANIZATIONNAME = "";
+				ORGANIZATIONNAME = "Zhengyi Shen";
 				TargetAttributes = {
 					0889D10123C4720E00E867FF = {
 						CreatedOnToolsVersion = 11.3;

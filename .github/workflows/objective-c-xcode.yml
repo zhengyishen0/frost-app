@@ -66,20 +66,20 @@ jobs:
 
       - name: Find and Prepare Artifact
         run: |
-          echo "Looking for Blurred.app..."
-          find build -name "Blurred.app" -type d
-          APP_PATH=$(find build -name "Blurred.app" -type d | head -1)
+          echo "Looking for Frost.app..."
+          find build -name "Frost.app" -type d
+          APP_PATH=$(find build -name "Frost.app" -type d | head -1)
           if [ -z "$APP_PATH" ]; then
-            echo "Error: Blurred.app not found"
+            echo "Error: Frost.app not found"
             exit 1
           fi
           echo "Found app at: $APP_PATH"
           mkdir -p artifact
           cp -R "$APP_PATH" artifact/
-          cd artifact && zip -r Blurred-Monocle.zip Blurred.app
+          cd artifact && zip -r Frost.zip Frost.app
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Blurred-Monocle
-          path: artifact/Blurred-Monocle.zip
+          name: Frost
+          path: artifact/Frost.zip
