@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Black circle background -->
+  <circle cx="256" cy="256" r="240" fill="black"/>
+
+  <!-- White snowflake -->
+  <g stroke="white" stroke-width="20" stroke-linecap="round" fill="none">
+    <!-- 6 main arms -->
+    <line x1="256" y1="256" x2="256" y2="80"/>
+    <line x1="256" y1="256" x2="256" y2="432"/>
+    <line x1="256" y1="256" x2="103" y2="168"/>
+    <line x1="256" y1="256" x2="409" y2="344"/>
+    <line x1="256" y1="256" x2="103" y2="344"/>
+    <line x1="256" y1="256" x2="409" y2="168"/>
+
+    <!-- Branches on vertical arms -->
+    <line x1="256" y1="160" x2="210" y2="120"/>
+    <line x1="256" y1="160" x2="302" y2="120"/>
+    <line x1="256" y1="352" x2="210" y2="392"/>
+    <line x1="256" y1="352" x2="302" y2="392"/>
+
+    <!-- Branches on diagonal arms (upper left) -->
+    <line x1="170" y1="206" x2="140" y2="250"/>
+    <line x1="170" y1="206" x2="120" y2="190"/>
+
+    <!-- Branches on diagonal arms (upper right) -->
+    <line x1="342" y1="206" x2="372" y2="250"/>
+    <line x1="342" y1="206" x2="392" y2="190"/>
+
+    <!-- Branches on diagonal arms (lower left) -->
+    <line x1="170" y1="306" x2="140" y2="262"/>
+    <line x1="170" y1="306" x2="120" y2="322"/>
+
+    <!-- Branches on diagonal arms (lower right) -->
+    <line x1="342" y1="306" x2="372" y2="262"/>
+    <line x1="342" y1="306" x2="392" y2="322"/>
+  </g>
+</svg>

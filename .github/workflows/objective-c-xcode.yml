@@ -1,0 +1,85 @@
+name: Xcode - Build and Analyze
+
+on:
+  push:
+    branches: [ "master", "claude/**" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    name: Build and analyse default scheme using xcodebuild command
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Set Default Scheme
+        run: |
+          scheme_list=$(xcodebuild -list -json | tr -d "\n")
+          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
+          echo $default | cat >default
+          echo Using default scheme: $default
+
+      - name: Resolve Package Dependencies
+        run: |
+          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then
+            filetype_parameter="workspace"
+            file_to_build="`ls -A | grep -i \\.xcworkspace\$`"
+          else
+            filetype_parameter="project"
+            file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
+          fi
+          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
+          xcodebuild -resolvePackageDependencies -"$filetype_parameter" "$file_to_build"
+
+      - name: Build
+        env:
+          scheme: ${{ 'default' }}
+        run: |
+          if [ $scheme = default ]; then scheme=$(cat default); fi
+          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then
+            filetype_parameter="workspace"
+            file_to_build="`ls -A | grep -i \\.xcworkspace\$`"
+          else
+            filetype_parameter="project"
+            file_to_build="`ls -A | grep -i \\.xcodeproj\$`"
+          fi
+          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
+          xcodebuild clean build analyze \
+            -scheme "$scheme" \
+            -"$filetype_parameter" "$file_to_build" \
+            -configuration Release \
+            -destination 'platform=macOS,arch=arm64' \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty && exit ${PIPESTATUS[0]}
+
+      - name: Find and Prepare Artifact
+        run: |
+          echo "Looking for Blurred.app..."
+          find build -name "Blurred.app" -type d
+          APP_PATH=$(find build -name "Blurred.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: Blurred.app not found"
+            exit 1
+          fi
+          echo "Found app at: $APP_PATH"
+          mkdir -p artifact
+          cp -R "$APP_PATH" artifact/
+          cd artifact && zip -r Blurred-Monocle.zip Blurred.app
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Blurred-Monocle
+          path: artifact/Blurred-Monocle.zip

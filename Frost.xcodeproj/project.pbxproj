@@ -1,0 +1,635 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		085174A123FD2E9700B3B84F /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 085174A023FD2E9700B3B84F /* HotKey */; };
+		0889D11423C4738900E867FF /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0889D11323C4738900E867FF /* ServiceManagement.framework */; };
+		1EFFF5DE2F08522D002AF814 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5CA2F085176002AF814 /* AppDelegate.swift */; };
+		1EFFF5DF2F08524C002AF814 /* BlurManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5B92F085176002AF814 /* BlurManager.swift */; };
+		1EFFF5E02F085250002AF814 /* Bundle+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5BA2F085176002AF814 /* Bundle+Extension.swift */; };
+		1EFFF5E12F085254002AF814 /* Collection+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5BB2F085176002AF814 /* Collection+Extension.swift */; };
+		1EFFF5E22F085257002AF814 /* CursorShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5BC2F085176002AF814 /* CursorShakeDetector.swift */; };
+		1EFFF5E32F08525B002AF814 /* EventMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5BD2F085176002AF814 /* EventMonitor.swift */; };
+		1EFFF5E42F08525F002AF814 /* UserDefaults+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5BF2F085176002AF814 /* UserDefaults+Extension.swift */; };
+		1EFFF5E52F085263002AF814 /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5BE2F085176002AF814 /* String+Extension.swift */; };
+		1EFFF5E62F085268002AF814 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5C02F085176002AF814 /* Util.swift */; };
+		1EFFF5E72F08536B002AF814 /* GlobalKeyBindPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5B62F085176002AF814 /* GlobalKeyBindPreferences.swift */; };
+		1EFFF5E82F08536F002AF814 /* WindowInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5B72F085176002AF814 /* WindowInfo.swift */; };
+		1EFFF5E92F085378002AF814 /* AboutWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5C22F085176002AF814 /* AboutWindowController.swift */; };
+		1EFFF5EA2F08537C002AF814 /* SettingObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5C32F085176002AF814 /* SettingObservable.swift */; };
+		1EFFF5EB2F08537F002AF814 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5C42F085176002AF814 /* StatusBarController.swift */; };
+		1EFFF5EC2F085386002AF814 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5C62F085176002AF814 /* AboutView.swift */; };
+		1EFFF5ED2F085389002AF814 /* LinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5C72F085176002AF814 /* LinkView.swift */; };
+		1EFFF5EE2F08538D002AF814 /* StatusBarSwipeToSetAlphaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF5C82F085176002AF814 /* StatusBarSwipeToSetAlphaView.swift */; };
+		1EFFF5EF2F085397002AF814 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1EFFF5CB2F085176002AF814 /* Assets.xcassets */; };
+		1EFFF5F12F0853A8002AF814 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1EFFF5D02F085176002AF814 /* Localizable.strings */; };
+		1EFFF5F22F0853B2002AF814 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1EFFF5D42F085176002AF814 /* Main.storyboard */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0889D11523C4739600E867FF /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LoginItems;
+			dstSubfolderSpec = 1;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0889D11323C4738900E867FF /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
+		1EFFF5B42F08507B002AF814 /* Frost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Frost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1EFFF5B52F085083002AF814 /* FrostLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FrostLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1EFFF5B62F085176002AF814 /* GlobalKeyBindPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalKeyBindPreferences.swift; sourceTree = "<group>"; };
+		1EFFF5B72F085176002AF814 /* WindowInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowInfo.swift; sourceTree = "<group>"; };
+		1EFFF5B92F085176002AF814 /* BlurManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurManager.swift; sourceTree = "<group>"; };
+		1EFFF5BA2F085176002AF814 /* Bundle+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+Extension.swift"; sourceTree = "<group>"; };
+		1EFFF5BB2F085176002AF814 /* Collection+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+Extension.swift"; sourceTree = "<group>"; };
+		1EFFF5BC2F085176002AF814 /* CursorShakeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorShakeDetector.swift; sourceTree = "<group>"; };
+		1EFFF5BD2F085176002AF814 /* EventMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMonitor.swift; sourceTree = "<group>"; };
+		1EFFF5BE2F085176002AF814 /* String+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extension.swift"; sourceTree = "<group>"; };
+		1EFFF5BF2F085176002AF814 /* UserDefaults+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Extension.swift"; sourceTree = "<group>"; };
+		1EFFF5C02F085176002AF814 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
+		1EFFF5C22F085176002AF814 /* AboutWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutWindowController.swift; sourceTree = "<group>"; };
+		1EFFF5C32F085176002AF814 /* SettingObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingObservable.swift; sourceTree = "<group>"; };
+		1EFFF5C42F085176002AF814 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		1EFFF5C62F085176002AF814 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		1EFFF5C72F085176002AF814 /* LinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkView.swift; sourceTree = "<group>"; };
+		1EFFF5C82F085176002AF814 /* StatusBarSwipeToSetAlphaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarSwipeToSetAlphaView.swift; sourceTree = "<group>"; };
+		1EFFF5CA2F085176002AF814 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		1EFFF5CB2F085176002AF814 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1EFFF5CC2F085176002AF814 /* Frost.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Frost.entitlements; sourceTree = "<group>"; };
+		1EFFF5CD2F085176002AF814 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1EFFF5CE2F085176002AF814 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		1EFFF5CF2F085176002AF814 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		1EFFF5D12F085176002AF814 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		1EFFF5D22F085176002AF814 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		1EFFF5D32F085176002AF814 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
+		1EFFF5D62F08517E002AF814 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		1EFFF5D72F08517E002AF814 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1EFFF5D82F08517E002AF814 /* FrostLauncher.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FrostLauncher.entitlements; sourceTree = "<group>"; };
+		1EFFF5D92F08517E002AF814 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1EFFF5DA2F08517E002AF814 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		1EFFF5DB2F08517E002AF814 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0889D0FF23C4720E00E867FF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08FF678623A9156A00EACD58 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				085174A123FD2E9700B3B84F /* HotKey in Frameworks */,
+				0889D11423C4738900E867FF /* ServiceManagement.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0889D11223C4738900E867FF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0889D11323C4738900E867FF /* ServiceManagement.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		08FF678023A9156A00EACD58 = {
+			isa = PBXGroup;
+			children = (
+				0889D11223C4738900E867FF /* Frameworks */,
+				1EFFF5B42F08507B002AF814 /* Frost.app */,
+				1EFFF5B52F085083002AF814 /* FrostLauncher.app */,
+				1EFFF5D52F085176002AF814 /* Frost */,
+				1EFFF5DD2F08517E002AF814 /* FrostLauncher */,
+			);
+			sourceTree = "<group>";
+		};
+		1EFFF5B82F085176002AF814 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1EFFF5B62F085176002AF814 /* GlobalKeyBindPreferences.swift */,
+				1EFFF5B72F085176002AF814 /* WindowInfo.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1EFFF5C12F085176002AF814 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				1EFFF5B92F085176002AF814 /* BlurManager.swift */,
+				1EFFF5BA2F085176002AF814 /* Bundle+Extension.swift */,
+				1EFFF5BB2F085176002AF814 /* Collection+Extension.swift */,
+				1EFFF5BC2F085176002AF814 /* CursorShakeDetector.swift */,
+				1EFFF5BD2F085176002AF814 /* EventMonitor.swift */,
+				1EFFF5BE2F085176002AF814 /* String+Extension.swift */,
+				1EFFF5BF2F085176002AF814 /* UserDefaults+Extension.swift */,
+				1EFFF5C02F085176002AF814 /* Util.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		1EFFF5C52F085176002AF814 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				1EFFF5C22F085176002AF814 /* AboutWindowController.swift */,
+				1EFFF5C32F085176002AF814 /* SettingObservable.swift */,
+				1EFFF5C42F085176002AF814 /* StatusBarController.swift */,
+			);
+			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		1EFFF5C92F085176002AF814 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1EFFF5C62F085176002AF814 /* AboutView.swift */,
+				1EFFF5C72F085176002AF814 /* LinkView.swift */,
+				1EFFF5C82F085176002AF814 /* StatusBarSwipeToSetAlphaView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		1EFFF5D52F085176002AF814 /* Frost */ = {
+			isa = PBXGroup;
+			children = (
+				1EFFF5B82F085176002AF814 /* Models */,
+				1EFFF5C12F085176002AF814 /* Utilities */,
+				1EFFF5C52F085176002AF814 /* ViewControllers */,
+				1EFFF5C92F085176002AF814 /* Views */,
+				1EFFF5CA2F085176002AF814 /* AppDelegate.swift */,
+				1EFFF5CB2F085176002AF814 /* Assets.xcassets */,
+				1EFFF5CC2F085176002AF814 /* Frost.entitlements */,
+				1EFFF5CD2F085176002AF814 /* Info.plist */,
+				1EFFF5D02F085176002AF814 /* Localizable.strings */,
+				1EFFF5D42F085176002AF814 /* Main.storyboard */,
+			);
+			path = Frost;
+			sourceTree = "<group>";
+		};
+		1EFFF5DD2F08517E002AF814 /* FrostLauncher */ = {
+			isa = PBXGroup;
+			children = (
+				1EFFF5D62F08517E002AF814 /* AppDelegate.swift */,
+				1EFFF5D72F08517E002AF814 /* Assets.xcassets */,
+				1EFFF5D82F08517E002AF814 /* FrostLauncher.entitlements */,
+				1EFFF5D92F08517E002AF814 /* Info.plist */,
+				1EFFF5DC2F08517E002AF814 /* Main.storyboard */,
+			);
+			path = FrostLauncher;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0889D10123C4720E00E867FF /* FrostLauncher */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0889D11123C4721100E867FF /* Build configuration list for PBXNativeTarget "FrostLauncher" */;
+			buildPhases = (
+				0889D0FE23C4720E00E867FF /* Sources */,
+				0889D0FF23C4720E00E867FF /* Frameworks */,
+				0889D10023C4720E00E867FF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FrostLauncher;
+			productName = dimmerBarLauncher;
+			productReference = 1EFFF5B52F085083002AF814 /* FrostLauncher.app */;
+			productType = "com.apple.product-type.application";
+		};
+		08FF678823A9156A00EACD58 /* Frost */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 08FF679923A9156C00EACD58 /* Build configuration list for PBXNativeTarget "Frost" */;
+			buildPhases = (
+				08FF678523A9156A00EACD58 /* Sources */,
+				08FF678623A9156A00EACD58 /* Frameworks */,
+				08FF678723A9156A00EACD58 /* Resources */,
+				0889D11523C4739600E867FF /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Frost;
+			packageProductDependencies = (
+				085174A023FD2E9700B3B84F /* HotKey */,
+			);
+			productName = "Dimmer Bar";
+			productReference = 1EFFF5B42F08507B002AF814 /* Frost.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FF678123A9156A00EACD58 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1130;
+				LastUpgradeCheck = 2620;
+				ORGANIZATIONNAME = "";
+				TargetAttributes = {
+					0889D10123C4720E00E867FF = {
+						CreatedOnToolsVersion = 11.3;
+					};
+					08FF678823A9156A00EACD58 = {
+						CreatedOnToolsVersion = 11.3;
+					};
+				};
+			};
+			buildConfigurationList = 08FF678423A9156A00EACD58 /* Build configuration list for PBXProject "Frost" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"zh-Hans",
+			);
+			mainGroup = 08FF678023A9156A00EACD58;
+			packageReferences = (
+				0851749F23FD2E9700B3B84F /* XCRemoteSwiftPackageReference "HotKey" */,
+			);
+			productRefGroup = 08FF678023A9156A00EACD58;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				08FF678823A9156A00EACD58 /* Frost */,
+				0889D10123C4720E00E867FF /* FrostLauncher */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0889D10023C4720E00E867FF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08FF678723A9156A00EACD58 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EFFF5F12F0853A8002AF814 /* Localizable.strings in Resources */,
+				1EFFF5EF2F085397002AF814 /* Assets.xcassets in Resources */,
+				1EFFF5F22F0853B2002AF814 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0889D0FE23C4720E00E867FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08FF678523A9156A00EACD58 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EFFF5EA2F08537C002AF814 /* SettingObservable.swift in Sources */,
+				1EFFF5EB2F08537F002AF814 /* StatusBarController.swift in Sources */,
+				1EFFF5ED2F085389002AF814 /* LinkView.swift in Sources */,
+				1EFFF5E52F085263002AF814 /* String+Extension.swift in Sources */,
+				1EFFF5E62F085268002AF814 /* Util.swift in Sources */,
+				1EFFF5EC2F085386002AF814 /* AboutView.swift in Sources */,
+				1EFFF5E22F085257002AF814 /* CursorShakeDetector.swift in Sources */,
+				1EFFF5DF2F08524C002AF814 /* BlurManager.swift in Sources */,
+				1EFFF5E12F085254002AF814 /* Collection+Extension.swift in Sources */,
+				1EFFF5E32F08525B002AF814 /* EventMonitor.swift in Sources */,
+				1EFFF5EE2F08538D002AF814 /* StatusBarSwipeToSetAlphaView.swift in Sources */,
+				1EFFF5E02F085250002AF814 /* Bundle+Extension.swift in Sources */,
+				1EFFF5DE2F08522D002AF814 /* AppDelegate.swift in Sources */,
+				1EFFF5E72F08536B002AF814 /* GlobalKeyBindPreferences.swift in Sources */,
+				1EFFF5E92F085378002AF814 /* AboutWindowController.swift in Sources */,
+				1EFFF5E82F08536F002AF814 /* WindowInfo.swift in Sources */,
+				1EFFF5E42F08525F002AF814 /* UserDefaults+Extension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		1EFFF5D02F085176002AF814 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1EFFF5CE2F085176002AF814 /* en */,
+				1EFFF5CF2F085176002AF814 /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		1EFFF5D42F085176002AF814 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1EFFF5D12F085176002AF814 /* Base */,
+				1EFFF5D22F085176002AF814 /* en */,
+				1EFFF5D32F085176002AF814 /* zh-Hans */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		1EFFF5DC2F08517E002AF814 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1EFFF5DA2F08517E002AF814 /* Base */,
+				1EFFF5DB2F08517E002AF814 /* zh-Hans */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		0889D10F23C4721100E867FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = FrostLauncher/FrostLauncher.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Frost/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zhengyishen.frostlauncher;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		0889D11023C4721100E867FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = FrostLauncher/FrostLauncher.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Frost/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zhengyishen.frostlauncher;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		08FF679723A9156C00EACD58 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = L926GNJA8S;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		08FF679823A9156C00EACD58 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = L926GNJA8S;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		08FF679A23A9156C00EACD58 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Frost/Frost.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 3;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Frost/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zhengyishen.frost;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		08FF679B23A9156C00EACD58 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Frost/Frost.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 3;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Frost/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zhengyishen.frost;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0889D11123C4721100E867FF /* Build configuration list for PBXNativeTarget "FrostLauncher" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0889D10F23C4721100E867FF /* Debug */,
+				0889D11023C4721100E867FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		08FF678423A9156A00EACD58 /* Build configuration list for PBXProject "Frost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08FF679723A9156C00EACD58 /* Debug */,
+				08FF679823A9156C00EACD58 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		08FF679923A9156C00EACD58 /* Build configuration list for PBXNativeTarget "Frost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08FF679A23A9156C00EACD58 /* Debug */,
+				08FF679B23A9156C00EACD58 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0851749F23FD2E9700B3B84F /* XCRemoteSwiftPackageReference "HotKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/soffes/HotKey";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		085174A023FD2E9700B3B84F /* HotKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0851749F23FD2E9700B3B84F /* XCRemoteSwiftPackageReference "HotKey" */;
+			productName = HotKey;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 08FF678123A9156A00EACD58 /* Project object */;
+}
