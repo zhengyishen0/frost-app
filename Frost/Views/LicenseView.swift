@@ -8,18 +8,68 @@
 import SwiftUI
 import AppKit
 
-// NSTextField wrapper that properly supports paste
-struct PastableTextField: NSViewRepresentable {
+// Custom NSTextField that handles Cmd+V directly
+class PastableNSTextField: NSTextField {
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.modifierFlags.contains(.command) {
+            switch event.charactersIgnoringModifiers {
+            case "v":
+                // Handle paste directly
+                if let string = NSPasteboard.general.string(forType: .string) {
+                    self.stringValue = string
+                    // Notify delegate of change
+                    if let delegate = self.delegate as? NSTextFieldDelegate {
+                        NotificationCenter.default.post(
+                            name: NSControl.textDidChangeNotification,
+                            object: self
+                        )
+                    }
+                    return true
+                }
+            case "c":
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(self.stringValue, forType: .string)
+                return true
+            case "a":
+                self.selectText(nil)
+                return true
+            case "x":
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(self.stringValue, forType: .string)
+                self.stringValue = ""
+                NotificationCenter.default.post(
+                    name: NSControl.textDidChangeNotification,
+                    object: self
+                )
+                return true
+            default:
+                break
+            }
+        }
+        return super.performKeyEquivalent(with: event)
+    }
+}
+
+// NSTextField wrapper that properly handles Cmd+V paste
+struct LicenseTextField: NSViewRepresentable {
     @Binding var text: String
     var placeholder: String
 
     func makeNSView(context: Context) -> NSTextField {
-        let textField = NSTextField()
+        let textField = PastableNSTextField()
         textField.placeholderString = placeholder
         textField.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
         textField.alignment = .center
         textField.bezelStyle = .roundedBezel
         textField.delegate = context.coordinator
+        textField.isEditable = true
+        textField.isSelectable = true
+
+        // Make sure it can become first responder
+        DispatchQueue.main.async {
+            textField.window?.makeFirstResponder(textField)
+        }
+
         return textField
     }
 
@@ -34,9 +84,9 @@ struct PastableTextField: NSViewRepresentable {
     }
 
     class Coordinator: NSObject, NSTextFieldDelegate {
-        var parent: PastableTextField
+        var parent: LicenseTextField
 
-        init(_ parent: PastableTextField) {
+        init(_ parent: LicenseTextField) {
             self.parent = parent
         }
 
@@ -52,6 +102,8 @@ struct LicenseView: View {
     @State private var licenseKey: String = ""
     @State private var showError: Bool = false
     @State private var showSuccess: Bool = false
+    @State private var activatedKey: String = ""
+    @State private var copied: Bool = false
     @Environment(\.dismiss) private var dismiss
 
     private let isAlreadyLicensed = LicenseManager.shared.isLicensed
@@ -76,96 +128,144 @@ struct LicenseView: View {
                         .multilineTextAlignment(.center)
 
                     if let storedKey = LicenseManager.shared.storedLicense {
-                        Text(storedKey)
-                            .font(.system(size: 12, design: .monospaced))
-                            .foregroundColor(.secondary)
-                            .padding(8)
+                        Button(action: {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(storedKey, forType: .string)
+                            copied = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                copied = false
+                            }
+                        }) {
+                            HStack(spacing: 8) {
+                                Text(storedKey)
+                                    .font(.system(size: 12, design: .monospaced))
+                                    .foregroundColor(.primary)
+
+                                Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(copied ? .green : .secondary)
+                            }
+                            .padding(10)
                             .background(Color.gray.opacity(0.1))
                             .cornerRadius(6)
+                        }
+                        .buttonStyle(.plain)
+
+                        if copied {
+                            Text("Copied!")
+                                .font(.system(size: 11))
+                                .foregroundColor(.green)
+                        }
                     }
                 }
             } else {
                 // License input view
                 VStack(spacing: 16) {
-                    // Show trial status
-                    if LicenseManager.shared.isTrialActive {
-                        Text(LicenseManager.shared.statusText)
-                            .font(.system(size: 13))
-                            .foregroundColor(.orange)
-                    } else {
-                        Text("Trial expired")
-                            .font(.system(size: 13))
-                            .foregroundColor(.red)
-                    }
-
-                    Text("Paste your license key below")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-
-                    PastableTextField(text: $licenseKey, placeholder: "FROST-SNOW-ICE-CRYSTAL")
-                        .frame(width: 280, height: 24)
-                        .onChange(of: licenseKey) { _ in
-                            showError = false
-                            showSuccess = false
-                        }
-
-                    if showError {
-                        Text("Invalid license key")
-                            .font(.system(size: 12))
-                            .foregroundColor(.red)
-                    }
-
                     if showSuccess {
-                        Text("License activated!")
-                            .font(.system(size: 12))
-                            .foregroundColor(.green)
-                    }
+                        // Success state
+                        VStack(spacing: 12) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.green)
 
-                    HStack(spacing: 12) {
-                        Button("Cancel") {
-                            dismiss()
+                            Text("License activated!")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.green)
+
+                            Button(action: {
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(activatedKey, forType: .string)
+                                copied = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    copied = false
+                                }
+                            }) {
+                                HStack(spacing: 8) {
+                                    Text(activatedKey)
+                                        .font(.system(size: 12, design: .monospaced))
+                                        .foregroundColor(.primary)
+
+                                    Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                                        .font(.system(size: 11))
+                                        .foregroundColor(copied ? .green : .secondary)
+                                }
+                                .padding(10)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(6)
+                            }
+                            .buttonStyle(.plain)
+
+                            if copied {
+                                Text("Copied!")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.green)
+                            }
+
+                            Button("Done") {
+                                dismiss()
+                                NotificationCenter.default.post(name: .licenseStatusChanged, object: nil)
+                            }
+                            .keyboardShortcut(.defaultAction)
                         }
-                        .keyboardShortcut(.cancelAction)
+                    } else {
+                        // Input state
+                        Text("Paste your license key below")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
 
-                        Button("Activate") {
-                            activateLicense()
+                        LicenseTextField(text: $licenseKey, placeholder: "XXXX-XXXX-XXXX-XXXX")
+                            .frame(width: 260, height: 24)
+                            .onChange(of: licenseKey) { _ in
+                                showError = false
+                            }
+
+                        if showError {
+                            Text("Invalid license key")
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
                         }
-                        .keyboardShortcut(.defaultAction)
-                        .disabled(licenseKey.trimmingCharacters(in: .whitespaces).isEmpty)
-                    }
 
-                    Divider()
-                        .padding(.top, 8)
+                        HStack(spacing: 12) {
+                            Button("Cancel") {
+                                dismiss()
+                            }
+                            .keyboardShortcut(.cancelAction)
 
-                    Button(action: {
-                        if let url = URL(string: "https://buy.stripe.com/00w14ndAA3hv2p8duv5EY04") {
-                            NSWorkspace.shared.open(url)
+                            Button("Activate") {
+                                activateLicense()
+                            }
+                            .keyboardShortcut(.defaultAction)
+                            .disabled(licenseKey.trimmingCharacters(in: .whitespaces).isEmpty)
                         }
-                    }) {
-                        Text("Purchase License")
-                            .font(.system(size: 12))
-                            .foregroundColor(.blue)
+
+                        Divider()
+                            .padding(.top, 8)
+
+                        Button(action: {
+                            if let url = URL(string: "https://buy.stripe.com/00w14ndAA3hv2p8duv5EY04") {
+                                NSWorkspace.shared.open(url)
+                            }
+                        }) {
+                            Text("Purchase License")
+                                .font(.system(size: 13))
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
 
             Spacer()
         }
         .padding(30)
-        .frame(width: 340, height: isAlreadyLicensed ? 220 : 360)
+        .frame(width: 340, height: isAlreadyLicensed ? 220 : 320)
     }
 
     private func activateLicense() {
         if LicenseManager.shared.activate(key: licenseKey) {
+            activatedKey = licenseKey
             showSuccess = true
             showError = false
-            // Close window after short delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                dismiss()
-                // Notify that license status changed
-                NotificationCenter.default.post(name: .licenseStatusChanged, object: nil)
-            }
         } else {
             showError = true
             showSuccess = false

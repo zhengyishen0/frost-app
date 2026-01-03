@@ -28,7 +28,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard let hotKey = hotKey else { return }
 
             hotKey.keyDownHandler = {
-                BlurManager.sharedInstance.setting.isEnabled.toggle()
+                let setting = BlurManager.sharedInstance.setting
+                if !setting.isEnabled {
+                    // Trying to enable - check license
+                    if !LicenseManager.shared.canUseApp {
+                        LicenseWindowController.shared.showLicenseWindow()
+                        return
+                    }
+                }
+                setting.isEnabled.toggle()
             }
         }
     }
@@ -40,10 +48,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         hideDockIcon()
         setupAutoStartAtLogin()
+        checkLicenseStatus()
         openPrefWindowIfNeeded()
         setupHotKey()
         setupCursorShakeDetector()
         setupEventMonitor()
+    }
+
+    /// Check license/trial status and disable app if expired
+    private func checkLicenseStatus() {
+        if !LicenseManager.shared.canUseApp {
+            // Trial expired and not licensed - force disable
+            BlurManager.sharedInstance.setting.isEnabled = false
+            // Show license window
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                LicenseWindowController.shared.showLicenseWindow()
+            }
+        }
     }
 
     func setupEventMonitor() {

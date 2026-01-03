@@ -28,7 +28,8 @@ class StatusBarController {
     private func setupView() {
         if let button = menuStatusItem.button {
             // Use SF Symbol snowflake icon (black, simple)
-            if let snowflakeImage = NSImage(systemSymbolName: "snowflake", accessibilityDescription: "Frost") {
+            let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .regular)
+            if let snowflakeImage = NSImage(systemSymbolName: "snowflake", accessibilityDescription: "Frost")?.withSymbolConfiguration(config) {
                 snowflakeImage.isTemplate = true  // Makes it adapt to menu bar (black in light mode)
                 button.image = snowflakeImage
             } else {
@@ -170,6 +171,19 @@ class StatusBarController {
         aboutItem.target = self
         menu.addItem(aboutItem)
 
+        // Check for Updates
+        let updateItem = NSMenuItem(title: "Check for Updates...".localized, action: #selector(checkForUpdates), keyEquivalent: "")
+        updateItem.target = self
+        menu.addItem(updateItem)
+
+        // DEBUG: Test Expiry button
+        #if DEBUG
+        menu.addItem(NSMenuItem.separator())
+        let testExpiryItem = NSMenuItem(title: "⚠️ Test Expiry", action: #selector(testExpiry), keyEquivalent: "")
+        testExpiryItem.target = self
+        menu.addItem(testExpiryItem)
+        #endif
+
         // Quit
         menu.addItem(NSMenuItem(title: "Quit".localized, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
@@ -207,6 +221,15 @@ class StatusBarController {
     }
 
     @objc private func powerSwitchChanged(_ sender: NSSwitch) {
+        if sender.state == .on {
+            // Check if user can use the app
+            if !LicenseManager.shared.canUseApp {
+                // Trial expired and not licensed - show license window
+                sender.state = .off
+                LicenseWindowController.shared.showLicenseWindow()
+                return
+            }
+        }
         BlurManager.sharedInstance.setting.isEnabled = (sender.state == .on)
     }
 
@@ -245,6 +268,101 @@ class StatusBarController {
         AboutWindowController.shared.showAboutWindow()
     }
 
+    #if DEBUG
+    @objc private func testExpiry() {
+        // Remove license
+        UserDefaults.standard.removeObject(forKey: "FrostLicenseKey")
+
+        // Set first launch to 8 days ago
+        let eightDaysAgo = Calendar.current.date(byAdding: .day, value: -8, to: Date())!
+        UserDefaults.standard.set(eightDaysAgo, forKey: "FrostFirstLaunchDate")
+        UserDefaults.standard.synchronize()
+
+        // Disable blur
+        BlurManager.sharedInstance.setting.isEnabled = false
+
+        // Show alert and quit
+        let alert = NSAlert()
+        alert.messageText = "Test Expiry Set"
+        alert.informativeText = "License removed and trial set to expired. The app will now quit. Please relaunch to test the expired behavior."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Quit")
+        alert.runModal()
+
+        NSApplication.shared.terminate(nil)
+    }
+    #endif
+
+    @objc private func checkForUpdates() {
+        let currentVersion = Bundle.main.releaseVersionNumber ?? "0.0.0"
+
+        let url = URL(string: "https://api.github.com/repos/zhengyishen0/frost-app/releases/latest")!
+        var request = URLRequest(url: url)
+        request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.showUpdateAlert(title: "Update Check Failed", message: "Could not check for updates: \(error.localizedDescription)")
+                    return
+                }
+
+                guard let data = data,
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let tagName = json["tag_name"] as? String else {
+                    self.showUpdateAlert(title: "Update Check Failed", message: "Could not parse update information.")
+                    return
+                }
+
+                // Remove 'v' prefix if present (e.g., "v1.0.5" -> "1.0.5")
+                let latestVersion = tagName.hasPrefix("v") ? String(tagName.dropFirst()) : tagName
+
+                if self.isVersion(latestVersion, newerThan: currentVersion) {
+                    let alert = NSAlert()
+                    alert.messageText = "Update Available"
+                    alert.informativeText = "A new version (\(latestVersion)) is available. You are currently running version \(currentVersion)."
+                    alert.alertStyle = .informational
+                    alert.addButton(withTitle: "Download")
+                    alert.addButton(withTitle: "Later")
+
+                    if alert.runModal() == .alertFirstButtonReturn {
+                        if let downloadURL = URL(string: "https://github.com/zhengyishen0/frost-app/releases/latest") {
+                            NSWorkspace.shared.open(downloadURL)
+                        }
+                    }
+                } else {
+                    self.showUpdateAlert(title: "You're Up to Date", message: "Frost \(currentVersion) is the latest version.")
+                }
+            }
+        }.resume()
+    }
+
+    private func showUpdateAlert(title: String, message: String) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+
+    private func isVersion(_ version1: String, newerThan version2: String) -> Bool {
+        let v1Components = version1.split(separator: ".").compactMap { Int($0) }
+        let v2Components = version2.split(separator: ".").compactMap { Int($0) }
+
+        let maxLength = max(v1Components.count, v2Components.count)
+
+        for i in 0..<maxLength {
+            let v1 = i < v1Components.count ? v1Components[i] : 0
+            let v2 = i < v2Components.count ? v2Components[i] : 0
+
+            if v1 > v2 { return true }
+            if v1 < v2 { return false }
+        }
+
+        return false
+    }
+
     // MARK: - Mode Toggle View
 
     private func createModeToggleView(setting: SettingObservable) -> NSView {
@@ -252,8 +370,21 @@ class StatusBarController {
 
         let segmentedControl = NSSegmentedControl(frame: NSRect(x: 16, y: 4, width: 168, height: 24))
         segmentedControl.segmentCount = 2
+
+        // Frost segment with snowflake icon
+        if let snowflakeImage = NSImage(systemSymbolName: "snowflake", accessibilityDescription: "Frost") {
+            segmentedControl.setImage(snowflakeImage, forSegment: 0)
+        }
         segmentedControl.setLabel("Frost".localized, forSegment: 0)
+        segmentedControl.setImageScaling(.scaleProportionallyDown, forSegment: 0)
+
+        // Fog segment with cloud icon
+        if let cloudImage = NSImage(systemSymbolName: "cloud.fill", accessibilityDescription: "Fog") {
+            segmentedControl.setImage(cloudImage, forSegment: 1)
+        }
         segmentedControl.setLabel("Fog".localized, forSegment: 1)
+        segmentedControl.setImageScaling(.scaleProportionallyDown, forSegment: 1)
+
         segmentedControl.segmentStyle = .rounded
         segmentedControl.trackingMode = .selectOne
         segmentedControl.target = self

@@ -23,7 +23,7 @@ class LicenseWindowController {
         let licenseView = LicenseView()
         let hostingController = NSHostingController(rootView: licenseView)
 
-        let height: CGFloat = LicenseManager.shared.isLicensed ? 220 : 360
+        let height: CGFloat = LicenseManager.shared.isLicensed ? 220 : 320
 
         let newWindow = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 340, height: height),
