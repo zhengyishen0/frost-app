@@ -117,10 +117,9 @@ class BlurManager {
             }
         }
 
-        // Use longer delay to allow Mission Control exit animation to complete
-        // Mission Control animation is ~0.3-0.4s, so we wait 0.35s to get correct window size/position
-        // Even for direct clicks, use a small delay to handle edge cases
-        let delay = withDelay ? 0.35 : 0.35
+        // Use delay to allow Mission Control exit animation to complete
+        // Mission Control animation is ~0.3s, so we wait 0.25s to get correct window size/position
+        let delay = withDelay ? 0.25 : 0.25
         print("👆 [Click] Scheduling updateBlur in \(delay)s (withDelay: \(withDelay))")
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             self?.updateBlur()
