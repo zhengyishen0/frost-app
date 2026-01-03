@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frost - Focus on what matters</title>
+    <meta name="description" content="Frost applies a beautiful frosted blur to everything except your focused window. Distractions fade away, focus stays sharp.">
+    <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .icon {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .tagline {
+            font-size: 24px;
+            color: #a0aec0;
+            margin-bottom: 40px;
+        }
+        .buy-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+        .price-text {
+            font-size: 18px;
+            color: #a0aec0;
+            margin-bottom: 20px;
+        }
+        .price-text strong {
+            color: #fff;
+            font-size: 32px;
+        }
+        .lifetime {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+            text-align: left;
+        }
+        .feature {
+            background: rgba(255,255,255,0.05);
+            padding: 24px;
+            border-radius: 12px;
+        }
+        .feature h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .feature p {
+            font-size: 14px;
+            color: #a0aec0;
+        }
+        .download-section {
+            margin-top: 40px;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #fff;
+            color: #1a1a2e;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+        }
+        .secondary-link {
+            display: block;
+            margin-top: 16px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .requirements {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #666;
+        }
+        footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            color: #666;
+        }
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="misc/icon.png" alt="Frost" class="icon">
+        <h1>Frost</h1>
+        <p class="tagline">Focus on what matters.</p>
+
+        <div class="buy-section">
+            <div class="lifetime">Lifetime License</div>
+            <p class="price-text">One-time payment of <strong>$5</strong></p>
+            <stripe-buy-button
+                buy-button-id="buy_btn_1SlXNyH9hnRIC1cVBWe98nx4"
+                publishable-key="pk_live_51NNIslH9hnRIC1cV2TKRrBL9Lx8XiF6wurWj7DNEOu2dkfONUGLxzA6is1EQGge8e3RliAgYRFT7nbHfaUlG2Qt400y3Krwkly"
+            >
+            </stripe-buy-button>
+            <p style="margin-top: 16px; font-size: 14px; color: #666;">
+                Pay once, use forever. No subscription.
+            </p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>Frost Mode</h3>
+                <p>Uniform frosted blur, like ice on a winter window</p>
+            </div>
+            <div class="feature">
+                <h3>Fog Mode</h3>
+                <p>Gradient blur that keeps dock and menu bar visible</p>
+            </div>
+            <div class="feature">
+                <h3>Smooth Transitions</h3>
+                <p>Beautiful 1s, 1.5s, or 2s fade animations</p>
+            </div>
+            <div class="feature">
+                <h3>Shake to Defrost</h3>
+                <p>Shake your cursor to temporarily clear the blur</p>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <a href="https://github.com/zhengyishen0/frost-app/releases/latest" class="download-btn">
+                Download Frost
+            </a>
+            <a href="https://github.com/zhengyishen0/frost-app" class="secondary-link">
+                View on GitHub
+            </a>
+        </div>
+
+        <p class="requirements">
+            Requires macOS 14.0 (Sonoma) or later
+        </p>
+
+        <footer>
+            Made by <a href="https://x.com/ZhengyiShen">Zhengyi Shen</a>
+        </footer>
+    </div>
+</body>
+</html>
