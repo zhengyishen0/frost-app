@@ -77,6 +77,8 @@ class BlurManager {
     private var currentFocusedWindowFrame: CGRect = .zero
     private var isAnimating = false
     private var isRecoveringFromSpaceChange = false
+    private var updateRetryCount = 0
+    private let maxUpdateRetries = 3
 
     // Track hole layers for cleanup
     private var activeHoleLayers: [CALayer] = []
@@ -240,8 +242,21 @@ extension BlurManager {
         let windowInfos = getWindowInfos()
         guard let frontWindow = windowInfos.first else {
             print("🔍 [Update] No front window found")
+            // Retry if we're in a transition state (Mission Control exit, etc.)
+            if updateRetryCount < maxUpdateRetries {
+                updateRetryCount += 1
+                print("🔍 [Update] Scheduling retry \(updateRetryCount)/\(maxUpdateRetries)")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                    self?.updateBlur()
+                }
+            } else {
+                updateRetryCount = 0
+            }
             return
         }
+
+        // Reset retry count on success
+        updateRetryCount = 0
 
         let newFocusedWindowNumber = frontWindow.number
         let newFocusedWindowFrame = frontWindow.bounds ?? .zero
@@ -536,16 +551,32 @@ extension BlurManager {
 
     private func orderBlurWindows(below windowNumber: Int) {
         print("📐 [Order] Ordering blur windows below window #\(windowNumber)")
+
+        // Verify the target window exists
+        let allWindows = CGWindowListCopyWindowInfo([.optionOnScreenOnly], CGWindowID(0)) as? [[String: Any]] ?? []
+        let targetExists = allWindows.contains { dict in
+            (dict[kCGWindowNumber as String] as? Int) == windowNumber
+        }
+        print("📐 [Order] Target window exists: \(targetExists)")
+
         for (screen, blurWindow) in blurWindows {
             blurWindow.setFrame(screen.frame, display: false)
 
-            // Ensure window is visible first (critical after Mission Control)
+            // Step 1: Ensure window is in the window server by bringing it front
             blurWindow.orderFrontRegardless()
 
-            // Then order below the target window
-            blurWindow.order(.below, relativeTo: windowNumber)
+            // Step 2: Force display to ensure it's rendered
+            blurWindow.displayIfNeeded()
 
-            print("📐 [Order] Screen \(screen.localizedName): window level \(blurWindow.level.rawValue), alpha \(blurWindow.contentView?.alphaValue ?? -1)")
+            // Step 3: Order below the target window (only if it exists)
+            if targetExists {
+                blurWindow.order(.below, relativeTo: windowNumber)
+            } else {
+                // Fallback: just keep it at back
+                blurWindow.orderBack(nil)
+            }
+
+            print("📐 [Order] Screen \(screen.localizedName): level \(blurWindow.level.rawValue), alpha \(blurWindow.contentView?.alphaValue ?? -1), visible: \(blurWindow.isVisible), onScreen: \(blurWindow.isOnActiveSpace)")
         }
     }
 
@@ -554,35 +585,22 @@ extension BlurManager {
 
         print("✨ [Show] showBlur(animated: \(animated)), target alpha: \(targetAlpha)")
 
-        // CRITICAL: Ensure windows are visible before animating
-        for (_, window) in blurWindows {
-            if !window.isVisible {
-                print("✨ [Show] Making window visible")
-                window.orderFrontRegardless()
-            }
-        }
-
         if animated {
             let duration = setting.transitionDuration.rawValue
             print("✨ [Show] Animating over \(duration)s")
 
-            for (_, window) in blurWindows {
-                guard let layer = window.contentView?.layer else { continue }
+            // Use NSAnimationContext instead of CABasicAnimation for better window server integration
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = duration
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                context.allowsImplicitAnimation = true
 
-                let fromAlpha = layer.presentation()?.opacity ?? layer.opacity
-                print("✨ [Show] Animating from \(fromAlpha) to \(targetAlpha)")
-
-                let animation = CABasicAnimation(keyPath: "opacity")
-                animation.fromValue = fromAlpha
-                animation.toValue = Float(targetAlpha)
-                animation.duration = duration
-                animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                animation.fillMode = .forwards
-                animation.isRemovedOnCompletion = false
-
-                layer.add(animation, forKey: "showBlur")
-                window.contentView?.alphaValue = targetAlpha
-            }
+                for (_, window) in self.blurWindows {
+                    let currentAlpha = window.contentView?.alphaValue ?? 0
+                    print("✨ [Show] Animating from \(currentAlpha) to \(targetAlpha)")
+                    window.contentView?.animator().alphaValue = targetAlpha
+                }
+            })
         } else {
             print("✨ [Show] Setting alpha immediately to \(targetAlpha)")
             for (_, window) in blurWindows {
@@ -595,20 +613,15 @@ extension BlurManager {
         if animated {
             let animDuration = duration ?? setting.transitionDuration.rawValue
 
-            for (_, window) in blurWindows {
-                guard let layer = window.contentView?.layer else { continue }
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = animDuration
+                context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+                context.allowsImplicitAnimation = true
 
-                let animation = CABasicAnimation(keyPath: "opacity")
-                animation.fromValue = layer.opacity
-                animation.toValue = 0.0
-                animation.duration = animDuration
-                animation.timingFunction = CAMediaTimingFunction(name: .easeIn)
-                animation.fillMode = .forwards
-                animation.isRemovedOnCompletion = false
-
-                layer.add(animation, forKey: "hideBlur")
-                window.contentView?.alphaValue = 0.0
-            }
+                for (_, window) in self.blurWindows {
+                    window.contentView?.animator().alphaValue = 0.0
+                }
+            })
         } else {
             for (_, window) in blurWindows {
                 window.contentView?.alphaValue = 0.0
@@ -629,9 +642,29 @@ extension BlurManager {
 
         let ownPID = Int(ProcessInfo.processInfo.processIdentifier)
 
+        // System processes to ignore (these can appear as "frontmost" during Mission Control transitions)
+        let systemProcessNames: Set<String> = [
+            "Dock",
+            "Control Center",
+            "Notification Center",
+            "WindowManager",
+            "SystemUIServer",
+            "Spotlight"
+        ]
+
         return windowsListInfo
             .map { WindowInfo(dict: $0) }
-            .filter { $0.layer == 0 && $0.ownerPID != ownPID }
+            .filter { info in
+                // Must be layer 0 (normal window level)
+                guard info.layer == 0 else { return false }
+                // Must not be our own app
+                guard info.ownerPID != ownPID else { return false }
+                // Must not be a system process that appears during transitions
+                if let ownerName = info.ownerName, systemProcessNames.contains(ownerName) {
+                    return false
+                }
+                return true
+            }
     }
 }
 
