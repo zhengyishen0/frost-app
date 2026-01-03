@@ -266,6 +266,8 @@ struct LicenseView: View {
             activatedKey = licenseKey
             showSuccess = true
             showError = false
+            // Auto-enable blur when license is activated
+            BlurManager.sharedInstance.setting.isEnabled = true
         } else {
             showError = true
             showSuccess = false
