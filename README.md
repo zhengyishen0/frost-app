@@ -9,14 +9,14 @@
 </p>
 
 <p align="center">
-	<a href="https://github.com/zhengyishen/frost-app/releases/latest">
-		<img src="https://img.shields.io/github/v/release/zhengyishen/frost-app?style=flat-square&color=blue" alt="Latest Release">
+	<a href="https://github.com/zhengyishen0/frost-app/releases/latest">
+		<img src="https://img.shields.io/github/v/release/zhengyishen0/frost-app?style=flat-square&color=blue" alt="Latest Release">
 	</a>
-	<a href="https://github.com/zhengyishen/frost-app/releases">
-		<img src="https://img.shields.io/github/downloads/zhengyishen/frost-app/total?style=flat-square&color=brightgreen" alt="Downloads">
+	<a href="https://github.com/zhengyishen0/frost-app/releases">
+		<img src="https://img.shields.io/github/downloads/zhengyishen0/frost-app/total?style=flat-square&color=brightgreen" alt="Downloads">
 	</a>
-	<a href="https://github.com/zhengyishen/frost-app/blob/main/LICENSE">
-		<img src="https://img.shields.io/github/license/zhengyishen/frost-app?style=flat-square" alt="License">
+	<a href="https://github.com/zhengyishen0/frost-app/blob/main/LICENSE">
+		<img src="https://img.shields.io/github/license/zhengyishen0/frost-app?style=flat-square" alt="License">
 	</a>
 	<img src="https://img.shields.io/badge/macOS-14.0+-orange?style=flat-square" alt="macOS 14+">
 </p>
@@ -56,7 +56,7 @@ Perfect for keeping your dock and menu bar slightly visible while focusing on yo
 
 ## Installation
 
-1. [Download the latest release](https://github.com/zhengyishen/frost-app/releases/latest)
+1. [Download the latest release](https://github.com/zhengyishen0/frost-app/releases/latest)
 2. Unzip and drag `Frost.app` to Applications
 3. Right-click → Open (first launch only, to bypass Gatekeeper)
 
@@ -98,4 +98,4 @@ Built on the shoulders of giants:
 
 ## License
 
-MIT License © [Zhengyi Shen](https://github.com/zhengyishen)
+MIT License © [Zhengyi Shen](https://github.com/zhengyishen0)
