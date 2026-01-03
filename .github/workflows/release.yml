@@ -15,9 +15,6 @@ jobs:
         with:
           fetch-depth: 0  # Full history for commit count
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.app
-
       - name: Set version from tag
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
