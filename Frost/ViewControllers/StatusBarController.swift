@@ -16,11 +16,40 @@ class StatusBarController {
 
     private let menuStatusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private var cancellableSet: Set<AnyCancellable> = []
+    private weak var licenseMenuItem: NSMenuItem?
 
     // MARK: - Init
 
     init() {
         setupView()
+        observeLicenseChanges()
+    }
+
+    private func observeLicenseChanges() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(licenseStatusDidChange),
+            name: .licenseStatusChanged,
+            object: nil
+        )
+    }
+
+    @objc private func licenseStatusDidChange() {
+        // Update license menu item when license status changes
+        if let item = licenseMenuItem {
+            if LicenseManager.shared.isLicensed {
+                item.attributedTitle = nil
+                item.title = "License Activated"
+            } else if LicenseManager.shared.isTrialActive {
+                item.attributedTitle = nil
+                item.title = LicenseManager.shared.statusText
+            } else {
+                item.attributedTitle = NSAttributedString(
+                    string: "Trial Expired",
+                    attributes: [.foregroundColor: NSColor.systemRed]
+                )
+            }
+        }
     }
 
     // MARK: - Setup
@@ -173,6 +202,7 @@ class StatusBarController {
             )
         }
         menu.addItem(licenseItem)
+        self.licenseMenuItem = licenseItem  // Store reference for updates
 
         let updateItem = NSMenuItem(title: "Check for Updates...".localized, action: #selector(checkForUpdates), keyEquivalent: "")
         updateItem.target = self
