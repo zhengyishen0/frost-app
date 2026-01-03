@@ -76,6 +76,7 @@ class BlurManager {
     private var currentFocusedWindowNumber: Int = 0
     private var currentFocusedWindowFrame: CGRect = .zero
     private var isAnimating = false
+    private var isRecoveringFromSpaceChange = false
 
     // Track hole layers for cleanup
     private var activeHoleLayers: [CALayer] = []
@@ -92,6 +93,11 @@ class BlurManager {
     func blur(runningApplication: NSRunningApplication?, withDelay: Bool = true) {
         guard setting.isEnabled else {
             hideBlur(animated: true)
+            return
+        }
+
+        // Skip if recovering from space change - let the scheduled recovery complete
+        if isRecoveringFromSpaceChange {
             return
         }
 
@@ -507,6 +513,11 @@ extension BlurManager {
     private func orderBlurWindows(below windowNumber: Int) {
         for (screen, blurWindow) in blurWindows {
             blurWindow.setFrame(screen.frame, display: false)
+
+            // Ensure window is visible first (critical after Mission Control)
+            blurWindow.orderFrontRegardless()
+
+            // Then order below the target window
             blurWindow.order(.below, relativeTo: windowNumber)
         }
     }
@@ -642,6 +653,7 @@ extension BlurManager {
         cancelAnimations()
         currentFocusedWindowNumber = 0
         currentFocusedWindowFrame = .zero
+        isRecoveringFromSpaceChange = true
 
         // Set blur to transparent so it can animate back in smoothly
         for (_, window) in blurWindows {
@@ -649,8 +661,9 @@ extension BlurManager {
             window.contentView?.alphaValue = 0.0
         }
 
-        // Small delay to let the system settle, then animate blur back in
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+        // Longer delay to let the system fully settle after Mission Control
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            self?.isRecoveringFromSpaceChange = false
             self?.updateBlur()
         }
     }

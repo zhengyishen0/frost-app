@@ -3,9 +3,6 @@
 //  Frost
 //
 //  Copyright © 2026 Zhengyi Shen. All rights reserved.
-//  Copyright © 2026 Zhengyi Shen. All rights reserved.
-//
-//  Updated for Frost.
 //
 
 import Cocoa
