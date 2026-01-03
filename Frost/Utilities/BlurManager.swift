@@ -117,8 +117,11 @@ class BlurManager {
             }
         }
 
-        let delay = withDelay ? 0.05 : 0
-        print("👆 [Click] Scheduling updateBlur in \(delay)s")
+        // Use longer delay to allow Mission Control exit animation to complete
+        // Mission Control animation is ~0.3-0.4s, so we wait 0.35s to get correct window size/position
+        // Even for direct clicks, use a small delay to handle edge cases
+        let delay = withDelay ? 0.35 : 0.35
+        print("👆 [Click] Scheduling updateBlur in \(delay)s (withDelay: \(withDelay))")
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             self?.updateBlur()
         }
@@ -262,6 +265,7 @@ extension BlurManager {
         let newFocusedWindowFrame = frontWindow.bounds ?? .zero
 
         print("🔍 [Update] Front window: \(frontWindow.ownerName ?? "?"), number: \(newFocusedWindowNumber)")
+        print("🔍 [Update] Window frame: \(newFocusedWindowFrame)")
         print("🔍 [Update] Current tracked: \(currentFocusedWindowNumber)")
 
         // Check if focused window changed
