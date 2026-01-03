@@ -141,16 +141,29 @@ class StatusBarController {
             .store(in: &cancellableSet)
 
         menu.addItem(startAtLoginItem)
-        menu.addItem(NSMenuItem.separator())
 
-        // License
+        // License status (above divider)
+        let licenseStatus = LicenseManager.shared.statusText
         let licenseItem = NSMenuItem(
-            title: LicenseManager.shared.isLicensed ? "Licensed ✓".localized : "Enter License".localized,
+            title: licenseStatus,
             action: #selector(showLicense),
             keyEquivalent: ""
         )
         licenseItem.target = self
+
+        // Add visual indicator for trial/licensed status
+        if LicenseManager.shared.isLicensed {
+            // Just show "Licensed" in normal color
+            licenseItem.title = "Licensed"
+        } else if !LicenseManager.shared.isTrialActive {
+            // Trial expired - make it stand out
+            licenseItem.attributedTitle = NSAttributedString(
+                string: "Trial expired - Get License",
+                attributes: [.foregroundColor: NSColor.systemRed]
+            )
+        }
         menu.addItem(licenseItem)
+        menu.addItem(NSMenuItem.separator())
 
         // About
         let aboutItem = NSMenuItem(title: "About Frost".localized, action: #selector(showAbout), keyEquivalent: "")

@@ -6,6 +6,47 @@
 //
 
 import SwiftUI
+import AppKit
+
+// NSTextField wrapper that properly supports paste
+struct PastableTextField: NSViewRepresentable {
+    @Binding var text: String
+    var placeholder: String
+
+    func makeNSView(context: Context) -> NSTextField {
+        let textField = NSTextField()
+        textField.placeholderString = placeholder
+        textField.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
+        textField.alignment = .center
+        textField.bezelStyle = .roundedBezel
+        textField.delegate = context.coordinator
+        return textField
+    }
+
+    func updateNSView(_ nsView: NSTextField, context: Context) {
+        if nsView.stringValue != text {
+            nsView.stringValue = text
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, NSTextFieldDelegate {
+        var parent: PastableTextField
+
+        init(_ parent: PastableTextField) {
+            self.parent = parent
+        }
+
+        func controlTextDidChange(_ obj: Notification) {
+            if let textField = obj.object as? NSTextField {
+                parent.text = textField.stringValue
+            }
+        }
+    }
+}
 
 struct LicenseView: View {
     @State private var licenseKey: String = ""
@@ -46,15 +87,23 @@ struct LicenseView: View {
             } else {
                 // License input view
                 VStack(spacing: 16) {
+                    // Show trial status
+                    if LicenseManager.shared.isTrialActive {
+                        Text(LicenseManager.shared.statusText)
+                            .font(.system(size: 13))
+                            .foregroundColor(.orange)
+                    } else {
+                        Text("Trial expired")
+                            .font(.system(size: 13))
+                            .foregroundColor(.red)
+                    }
+
                     Text("Paste your license key below")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
 
-                    TextField("XXXX-XXXX-XXXX-XXXX", text: $licenseKey)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.system(size: 14, design: .monospaced))
-                        .multilineTextAlignment(.center)
-                        .frame(width: 260)
+                    PastableTextField(text: $licenseKey, placeholder: "FROST-SNOW-ICE-CRYSTAL")
+                        .frame(width: 280, height: 24)
                         .onChange(of: licenseKey) { _ in
                             showError = false
                             showSuccess = false
@@ -104,7 +153,7 @@ struct LicenseView: View {
             Spacer()
         }
         .padding(30)
-        .frame(width: 340, height: isAlreadyLicensed ? 220 : 320)
+        .frame(width: 340, height: isAlreadyLicensed ? 220 : 360)
     }
 
     private func activateLicense() {

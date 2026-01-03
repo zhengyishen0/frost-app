@@ -14,12 +14,23 @@ class LicenseManager {
     // MARK: - Constants
 
     private let licenseKey = "FrostLicenseKey"
+    private let firstLaunchKey = "FrostFirstLaunchDate"
+    private let trialDays = 7
 
     // 12 base words - sliding window of 4 creates weekly tokens
     private let words = [
         "FROST", "SNOW", "ICE", "CRYSTAL", "WINTER", "CHILL",
         "POLAR", "ARCTIC", "GLACIER", "POWDER", "ALPINE", "AURORA"
     ]
+
+    // MARK: - Initialization
+
+    init() {
+        // Record first launch date if not set
+        if UserDefaults.standard.object(forKey: firstLaunchKey) == nil {
+            UserDefaults.standard.set(Date(), forKey: firstLaunchKey)
+        }
+    }
 
     // MARK: - Public Methods
 
@@ -31,6 +42,41 @@ class LicenseManager {
     /// Get stored license key
     var storedLicense: String? {
         return UserDefaults.standard.string(forKey: licenseKey)
+    }
+
+    /// Check if trial is still active
+    var isTrialActive: Bool {
+        return trialDaysRemaining > 0
+    }
+
+    /// Get remaining trial days
+    var trialDaysRemaining: Int {
+        guard let firstLaunch = UserDefaults.standard.object(forKey: firstLaunchKey) as? Date else {
+            return trialDays
+        }
+        let daysSinceFirstLaunch = Calendar.current.dateComponents([.day], from: firstLaunch, to: Date()).day ?? 0
+        return max(0, trialDays - daysSinceFirstLaunch)
+    }
+
+    /// Check if app can be used (licensed OR trial active)
+    var canUseApp: Bool {
+        return isLicensed || isTrialActive
+    }
+
+    /// Get status text for display
+    var statusText: String {
+        if isLicensed {
+            return "Licensed"
+        } else if isTrialActive {
+            let days = trialDaysRemaining
+            if days == 1 {
+                return "Trial: 1 day left"
+            } else {
+                return "Trial: \(days) days left"
+            }
+        } else {
+            return "Trial expired"
+        }
     }
 
     /// Validate and store a license key
