@@ -37,6 +37,13 @@ Frost applies a beautiful frosted blur to everything except your focused window.
 
 ## Installation
 
+**Homebrew (recommended)**
+```bash
+brew tap zhengyishen0/frost
+brew install --cask frost
+```
+
+**Manual Download**
 1. Download the latest [Frost DMG](https://github.com/zhengyishen0/frost-app/releases/latest)
 2. Open the DMG and drag Frost to Applications
 3. Right-click → Open (first launch only, to bypass Gatekeeper)
