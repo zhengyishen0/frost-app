@@ -439,8 +439,8 @@ extension BlurManager {
         window.setFrame(frame, display: true)
 
         // CRITICAL: Make window visible immediately (required for animations to render)
-        window.makeKeyAndOrderFront(nil)
-        window.orderBack(nil)
+        // Use orderFrontRegardless() instead of makeKeyAndOrderFront() to avoid key window warnings
+        window.orderFrontRegardless()
 
         return window
     }
@@ -558,8 +558,7 @@ extension BlurManager {
         for (_, window) in blurWindows {
             if !window.isVisible {
                 print("✨ [Show] Making window visible")
-                window.makeKeyAndOrderFront(nil)
-                window.orderBack(nil)
+                window.orderFrontRegardless()
             }
         }
 
