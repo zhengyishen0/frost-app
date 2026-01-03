@@ -29,6 +29,9 @@
 		1EFFF5EF2F085397002AF814 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1EFFF5CB2F085176002AF814 /* Assets.xcassets */; };
 		1EFFF5F12F0853A8002AF814 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1EFFF5D02F085176002AF814 /* Localizable.strings */; };
 		1EFFF5F22F0853B2002AF814 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1EFFF5D42F085176002AF814 /* Main.storyboard */; };
+		1EFFF6002F090001002AF814 /* LicenseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF6012F090001002AF814 /* LicenseManager.swift */; };
+		1EFFF6022F090002002AF814 /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF6032F090002002AF814 /* LicenseView.swift */; };
+		1EFFF6042F090003002AF814 /* LicenseWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFFF6052F090003002AF814 /* LicenseWindowController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -76,6 +79,9 @@
 		1EFFF5D82F08517E002AF814 /* FrostLauncher.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FrostLauncher.entitlements; sourceTree = "<group>"; };
 		1EFFF5D92F08517E002AF814 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1EFFF5DA2F08517E002AF814 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		1EFFF6012F090001002AF814 /* LicenseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseManager.swift; sourceTree = "<group>"; };
+		1EFFF6032F090002002AF814 /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
+		1EFFF6052F090003002AF814 /* LicenseWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseWindowController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +140,7 @@
 				1EFFF5BB2F085176002AF814 /* Collection+Extension.swift */,
 				1EFFF5BC2F085176002AF814 /* CursorShakeDetector.swift */,
 				1EFFF5BD2F085176002AF814 /* EventMonitor.swift */,
+				1EFFF6012F090001002AF814 /* LicenseManager.swift */,
 				1EFFF5BE2F085176002AF814 /* String+Extension.swift */,
 				1EFFF5BF2F085176002AF814 /* UserDefaults+Extension.swift */,
 				1EFFF5C02F085176002AF814 /* Util.swift */,
@@ -145,6 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				1EFFF5C22F085176002AF814 /* AboutWindowController.swift */,
+				1EFFF6052F090003002AF814 /* LicenseWindowController.swift */,
 				1EFFF5C32F085176002AF814 /* SettingObservable.swift */,
 				1EFFF5C42F085176002AF814 /* StatusBarController.swift */,
 			);
@@ -155,6 +163,7 @@
 			isa = PBXGroup;
 			children = (
 				1EFFF5C62F085176002AF814 /* AboutView.swift */,
+				1EFFF6032F090002002AF814 /* LicenseView.swift */,
 				1EFFF5C72F085176002AF814 /* LinkView.swift */,
 				1EFFF5C82F085176002AF814 /* StatusBarSwipeToSetAlphaView.swift */,
 			);
@@ -322,6 +331,9 @@
 				1EFFF5E92F085378002AF814 /* AboutWindowController.swift in Sources */,
 				1EFFF5E82F08536F002AF814 /* WindowInfo.swift in Sources */,
 				1EFFF5E42F08525F002AF814 /* UserDefaults+Extension.swift in Sources */,
+				1EFFF6002F090001002AF814 /* LicenseManager.swift in Sources */,
+				1EFFF6022F090002002AF814 /* LicenseView.swift in Sources */,
+				1EFFF6042F090003002AF814 /* LicenseWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

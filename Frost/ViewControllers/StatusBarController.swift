@@ -143,6 +143,15 @@ class StatusBarController {
         menu.addItem(startAtLoginItem)
         menu.addItem(NSMenuItem.separator())
 
+        // License
+        let licenseItem = NSMenuItem(
+            title: LicenseManager.shared.isLicensed ? "Licensed ✓".localized : "Enter License".localized,
+            action: #selector(showLicense),
+            keyEquivalent: ""
+        )
+        licenseItem.target = self
+        menu.addItem(licenseItem)
+
         // About
         let aboutItem = NSMenuItem(title: "About Frost".localized, action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
@@ -213,6 +222,10 @@ class StatusBarController {
 
     @objc private func toggleStartAtLogin() {
         BlurManager.sharedInstance.setting.isStartWhenLogin.toggle()
+    }
+
+    @objc private func showLicense() {
+        LicenseWindowController.shared.showLicenseWindow()
     }
 
     @objc private func showAbout() {

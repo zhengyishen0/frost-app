@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frost - License Key</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .key-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .key {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            user-select: all;
+            cursor: text;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+        }
+        .copy-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+        .instructions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .error {
+            color: #e53e3e;
+        }
+        .error h1 {
+            color: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="content">
+        <!-- Content will be inserted by JavaScript -->
+    </div>
+
+    <script>
+        // 12 base words - sliding window of 4 creates weekly tokens
+        const words = [
+            "FROST", "SNOW", "ICE", "CRYSTAL", "WINTER", "CHILL",
+            "POLAR", "ARCTIC", "GLACIER", "POWDER", "ALPINE", "AURORA"
+        ];
+
+        // Generate token for a given week number (1-52)
+        function getTokenForWeek(weekNum) {
+            const startIndex = (weekNum - 1) % 12;
+            const tokenWords = [];
+            for (let i = 0; i < 4; i++) {
+                tokenWords.push(words[(startIndex + i) % 12]);
+            }
+            return tokenWords.join("-");
+        }
+
+        // Get ISO week number from date
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        // Get URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const sid = params.get('sid');
+        const code = params.get('code');
+
+        const content = document.getElementById('content');
+
+        // Validate parameters
+        if (code !== 'cold' || !sid || !sid.startsWith('cs_')) {
+            content.innerHTML = `
+                <div class="error">
+                    <div class="icon">⚠️</div>
+                    <h1>Invalid Access</h1>
+                    <p class="subtitle">Please purchase Frost through the official link.</p>
+                    <a href="https://github.com/zhengyishen0/frost-app" style="color: #667eea;">Visit Frost on GitHub</a>
+                </div>
+            `;
+        } else {
+            // Get current week's token
+            const now = new Date();
+            const weekNum = getWeekNumber(now);
+            const token = getTokenForWeek(weekNum);
+
+            content.innerHTML = `
+                <div class="icon">❄️</div>
+                <h1>Thanks for purchasing Frost!</h1>
+                <p class="subtitle">Your license key is ready</p>
+                <p class="key-label">LICENSE KEY</p>
+                <div class="key" id="license">${token}</div>
+                <button class="copy-btn" onclick="copyKey()">Copy to Clipboard</button>
+                <div class="instructions">
+                    <strong>How to activate:</strong><br>
+                    Open Frost → Click menu bar icon → Enter License → Paste key
+                </div>
+            `;
+        }
+
+        function copyKey() {
+            const key = document.getElementById('license').textContent;
+            navigator.clipboard.writeText(key).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = 'Copy to Clipboard';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
