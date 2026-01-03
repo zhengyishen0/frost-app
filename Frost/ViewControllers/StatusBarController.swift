@@ -60,17 +60,25 @@ class StatusBarController {
 
     // MARK: - Menu
 
+    private let menuWidth: CGFloat = 220
+
     private func createContextMenu() -> NSMenu {
         let menu = NSMenu()
+        menu.minimumWidth = menuWidth
         let setting = BlurManager.sharedInstance.setting
 
-        // Power switch toggle (green macOS-style switch)
+        // ═══════════════════════════════════════
+        // SECTION 1: Power Control
+        // ═══════════════════════════════════════
         let powerSwitchItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
         powerSwitchItem.view = createPowerSwitchView(setting: setting)
         menu.addItem(powerSwitchItem)
+
         menu.addItem(NSMenuItem.separator())
 
-        // Mode toggle - tab style: [ Frost | Fog ]
+        // ═══════════════════════════════════════
+        // SECTION 2: Mode & Style
+        // ═══════════════════════════════════════
         let modeItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
         modeItem.view = createModeToggleView(setting: setting)
         menu.addItem(modeItem)
@@ -94,7 +102,6 @@ class StatusBarController {
         let transitionMenuItem = NSMenuItem(title: "Transition".localized, action: nil, keyEquivalent: "")
         transitionMenuItem.submenu = transitionMenu
 
-        // Update checkmarks for transition duration
         setting.$transitionDuration
             .receive(on: DispatchQueue.main)
             .sink { currentDuration in
@@ -105,9 +112,12 @@ class StatusBarController {
             .store(in: &cancellableSet)
 
         menu.addItem(transitionMenuItem)
+
         menu.addItem(NSMenuItem.separator())
 
-        // Shake to Defrost toggle (checkbox)
+        // ═══════════════════════════════════════
+        // SECTION 3: Preferences
+        // ═══════════════════════════════════════
         let shakeItem = NSMenuItem(
             title: "Shake to Defrost".localized,
             action: #selector(toggleCursorShake),
@@ -125,7 +135,6 @@ class StatusBarController {
 
         menu.addItem(shakeItem)
 
-        // Start at Login toggle (checkbox)
         let startAtLoginItem = NSMenuItem(
             title: "Start at Login".localized,
             action: #selector(toggleStartAtLogin),
@@ -143,48 +152,41 @@ class StatusBarController {
 
         menu.addItem(startAtLoginItem)
 
-        // License status (above divider)
-        let licenseStatus = LicenseManager.shared.statusText
+        menu.addItem(NSMenuItem.separator())
+
+        // ═══════════════════════════════════════
+        // SECTION 4: License & Info
+        // ═══════════════════════════════════════
         let licenseItem = NSMenuItem(
-            title: licenseStatus,
+            title: LicenseManager.shared.statusText,
             action: #selector(showLicense),
             keyEquivalent: ""
         )
         licenseItem.target = self
 
-        // Add visual indicator for trial/licensed status
         if LicenseManager.shared.isLicensed {
-            // Just show "Licensed" in normal color
-            licenseItem.title = "Licensed"
+            licenseItem.title = "License Activated"
         } else if !LicenseManager.shared.isTrialActive {
-            // Trial expired - make it stand out
             licenseItem.attributedTitle = NSAttributedString(
-                string: "Trial expired - Get License",
+                string: "Trial Expired",
                 attributes: [.foregroundColor: NSColor.systemRed]
             )
         }
         menu.addItem(licenseItem)
-        menu.addItem(NSMenuItem.separator())
 
-        // About
-        let aboutItem = NSMenuItem(title: "About Frost".localized, action: #selector(showAbout), keyEquivalent: "")
-        aboutItem.target = self
-        menu.addItem(aboutItem)
-
-        // Check for Updates
         let updateItem = NSMenuItem(title: "Check for Updates...".localized, action: #selector(checkForUpdates), keyEquivalent: "")
         updateItem.target = self
         menu.addItem(updateItem)
 
-        // DEBUG: Test Expiry button
-        #if DEBUG
-        menu.addItem(NSMenuItem.separator())
-        let testExpiryItem = NSMenuItem(title: "⚠️ Test Expiry", action: #selector(testExpiry), keyEquivalent: "")
-        testExpiryItem.target = self
-        menu.addItem(testExpiryItem)
-        #endif
+        let aboutItem = NSMenuItem(title: "About Frost".localized, action: #selector(showAbout), keyEquivalent: "")
+        aboutItem.target = self
+        menu.addItem(aboutItem)
 
-        // Quit
+        menu.addItem(NSMenuItem.separator())
+
+        // ═══════════════════════════════════════
+        // SECTION 5: Quit
+        // ═══════════════════════════════════════
         menu.addItem(NSMenuItem(title: "Quit".localized, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
         return menu
@@ -193,17 +195,18 @@ class StatusBarController {
     // MARK: - Power Switch View
 
     private func createPowerSwitchView(setting: SettingObservable) -> NSView {
-        let containerView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 32))
+        let containerView = NSView(frame: NSRect(x: 0, y: 0, width: menuWidth, height: 32))
 
         // Label
         let label = NSTextField(labelWithString: "Enabled".localized)
-        label.frame = NSRect(x: 16, y: 6, width: 100, height: 20)
+        label.frame = NSRect(x: 14, y: 6, width: 100, height: 20)
         label.font = NSFont.systemFont(ofSize: 13)
         label.textColor = .labelColor
         containerView.addSubview(label)
 
-        // Green toggle switch
-        let toggle = NSSwitch(frame: NSRect(x: 150, y: 4, width: 40, height: 24))
+        // Green toggle switch - right aligned
+        let switchWidth: CGFloat = 38
+        let toggle = NSSwitch(frame: NSRect(x: menuWidth - switchWidth - 14, y: 4, width: switchWidth, height: 24))
         toggle.state = setting.isEnabled ? .on : .off
         toggle.target = self
         toggle.action = #selector(powerSwitchChanged(_:))
@@ -267,31 +270,6 @@ class StatusBarController {
     @objc private func showAbout() {
         AboutWindowController.shared.showAboutWindow()
     }
-
-    #if DEBUG
-    @objc private func testExpiry() {
-        // Remove license
-        UserDefaults.standard.removeObject(forKey: "FrostLicenseKey")
-
-        // Set first launch to 8 days ago
-        let eightDaysAgo = Calendar.current.date(byAdding: .day, value: -8, to: Date())!
-        UserDefaults.standard.set(eightDaysAgo, forKey: "FrostFirstLaunchDate")
-        UserDefaults.standard.synchronize()
-
-        // Disable blur
-        BlurManager.sharedInstance.setting.isEnabled = false
-
-        // Show alert and quit
-        let alert = NSAlert()
-        alert.messageText = "Test Expiry Set"
-        alert.informativeText = "License removed and trial set to expired. The app will now quit. Please relaunch to test the expired behavior."
-        alert.alertStyle = .informational
-        alert.addButton(withTitle: "Quit")
-        alert.runModal()
-
-        NSApplication.shared.terminate(nil)
-    }
-    #endif
 
     @objc private func checkForUpdates() {
         let currentVersion = Bundle.main.releaseVersionNumber ?? "0.0.0"
@@ -366,9 +344,10 @@ class StatusBarController {
     // MARK: - Mode Toggle View
 
     private func createModeToggleView(setting: SettingObservable) -> NSView {
-        let containerView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 32))
+        let containerView = NSView(frame: NSRect(x: 0, y: 0, width: menuWidth, height: 32))
 
-        let segmentedControl = NSSegmentedControl(frame: NSRect(x: 16, y: 4, width: 168, height: 24))
+        let segmentWidth = menuWidth - 28  // 14px padding on each side
+        let segmentedControl = NSSegmentedControl(frame: NSRect(x: 14, y: 4, width: segmentWidth, height: 24))
         segmentedControl.segmentCount = 2
 
         // Frost segment with snowflake icon
