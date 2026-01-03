@@ -15,86 +15,51 @@
 	<a href="https://github.com/zhengyishen0/frost-app/releases">
 		<img src="https://img.shields.io/github/downloads/zhengyishen0/frost-app/total?style=flat-square&color=brightgreen" alt="Downloads">
 	</a>
-	<a href="https://github.com/zhengyishen0/frost-app/blob/main/LICENSE">
-		<img src="https://img.shields.io/github/license/zhengyishen0/frost-app?style=flat-square" alt="License">
-	</a>
 	<img src="https://img.shields.io/badge/macOS-14.0+-orange?style=flat-square" alt="macOS 14+">
+	<img src="https://img.shields.io/badge/lang-EN%20%7C%20%E4%B8%AD%E6%96%87-lightgrey?style=flat-square" alt="English & Chinese">
+</p>
+
+<p align="center">
+	<!-- <img src="misc/demo.gif" alt="Frost Demo" width="600"> -->
 </p>
 
 ---
 
-## What is Frost?
-
-Frost applies a beautiful frosted blur to everything except the window you're working on. Stay focused without distractions.
-
----
+Frost applies a beautiful frosted blur to everything except your focused window. Distractions fade away, focus stays sharp.
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| **Frost Mode** | Uniform frosted blur with subtle grain texture |
-| **Fog Mode** | Gradient blur: strong at bottom, subtle at top |
-| **Smooth Transitions** | 1s, 1.5s, or 2s fade animations |
-| **Shake to Defrost** | Shake your cursor to temporarily clear the blur |
-| **Defrost Delay** | Auto-restore blur after 3s, 4s, or 5s |
-| **Start at Login** | Launch Frost automatically when you log in |
-
-### Frost Mode
-
-A uniform frosted blur effect with subtle grain texture. Everything outside your focused window gets a consistent blur—like ice crystals covering a winter window.
-
-### Fog Mode
-
-A gradient blur effect—like condensation settling on glass:
-- **Bottom**: Full blur (maximum focus)
-- **Top**: Subtle blur (peripheral awareness)
-
-Perfect for keeping your dock and menu bar slightly visible while focusing on your work.
-
----
+- **Frost Mode** — Uniform frosted blur, like ice on a winter window
+- **Fog Mode** — Gradient blur: strong at bottom, subtle at top (keeps dock/menu bar visible)
+- **Smooth Transitions** — 1s, 1.5s, or 2s fade animations
+- **Shake to Defrost** — Shake your cursor to temporarily clear the blur
+- **Start at Login** — Launch automatically when you log in
 
 ## Installation
 
-1. [Download the latest release](https://github.com/zhengyishen0/frost-app/releases/latest)
-2. Unzip and drag `Frost.app` to Applications
+1. Download the latest [Frost DMG](https://github.com/zhengyishen0/frost-app/releases/latest)
+2. Open the DMG and drag Frost to Applications
 3. Right-click → Open (first launch only, to bypass Gatekeeper)
-
----
 
 ## Usage
 
-1. Click the ❄️ snowflake icon in your menu bar
-2. Toggle between **Frost** and **Fog** modes
-3. Adjust transition speed and defrost delay as needed
-4. Shake your cursor to temporarily defrost
+Click the snowflake icon in your menu bar to:
+- Toggle Frost on/off
+- Switch between Frost and Fog modes
+- Adjust transition speed
 
----
+Shake your cursor anytime to temporarily see through the blur.
 
 ## Requirements
 
 - macOS 14.0 (Sonoma) or later
-- Apple Silicon or Intel
-
----
-
-## Known Issues
-
-- **Mission Control**: After using Mission Control, the blur animation may behave unexpectedly. Clicking on a window will restore normal behavior.
-- **Multi-window apps**: When switching between windows of the same app (e.g., multiple Chrome windows), the first click may not trigger the blur transition. A second click will work normally.
-
----
 
 ## Credits
 
-Built on the shoulders of giants:
-
 | Project | Contribution |
 |---------|--------------|
-| [**Blurred**](https://github.com/dwarvesf/blurred) by Dwarves Foundation | Original codebase and architecture |
-| [**Monocle**](https://monocle.heyiam.dk/) by Dominik Kandravy | Inspiration for blur effect and ambient mode |
-
----
+| [Blurred](https://github.com/dwarvesf/blurred) by Dwarves Foundation | Original codebase |
+| [Monocle](https://monocle.heyiam.dk/) by Dominik Kandravy | Inspiration for blur effect |
 
 ## License
 
