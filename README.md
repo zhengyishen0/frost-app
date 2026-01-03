@@ -17,6 +17,9 @@
 	</a>
 	<img src="https://img.shields.io/badge/macOS-14.0+-orange?style=flat-square" alt="macOS 14+">
 	<img src="https://img.shields.io/badge/lang-EN%20%7C%20%E4%B8%AD%E6%96%87-lightgrey?style=flat-square" alt="English & Chinese">
+	<a href="https://github.com/zhengyishen0/frost-app/blob/main/LICENSE">
+		<img src="https://img.shields.io/github/license/zhengyishen0/frost-app?style=flat-square" alt="License">
+	</a>
 </p>
 
 <p align="center">
