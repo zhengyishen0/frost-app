@@ -2,6 +2,23 @@
   Localizable.strings
   Frost
 
-  Copyright © 2026 Zhengyi Shen. All rights reserved.
+  English localization
   Copyright © 2026 Zhengyi Shen. All rights reserved.
 */
+
+// Menu items
+"Enabled" = "Enabled";
+"Enable" = "Enable";
+"Disable" = "Disable";
+"Frost" = "Frost";
+"Fog" = "Fog";
+"Transition" = "Transition";
+"Shake to Defrost" = "Shake to Defrost";
+"Start at Login" = "Start at Login";
+"About Frost" = "About Frost";
+"Quit" = "Quit";
+
+// Transition durations
+"1s" = "1s";
+"1.5s" = "1.5s";
+"2s" = "2s";

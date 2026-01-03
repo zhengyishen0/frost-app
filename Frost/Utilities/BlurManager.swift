@@ -3,7 +3,7 @@
 //
 //  Copyright © 2026 Zhengyi Shen. All rights reserved.
 //
-//  Redesigned for Frost: unified blur layer with elegant hole animation.
+//  Multi-layer frost system: layers crossfade to create smooth transitions.
 //
 
 import Foundation
@@ -59,6 +59,21 @@ enum ShakeRestoreDelay: Double, CaseIterable {
     }
 }
 
+// MARK: - FrostLayer
+
+/// A single frost layer that covers the screen and is ordered below a specific window
+class FrostLayer {
+    let id: UUID = UUID()
+    let window: NSWindow
+    let targetWindowNumber: Int
+    var currentOpacity: CGFloat = 0.0
+
+    init(window: NSWindow, targetWindowNumber: Int) {
+        self.window = window
+        self.targetWindowNumber = targetWindowNumber
+    }
+}
+
 // MARK: - BlurManager
 
 class BlurManager {
@@ -69,23 +84,18 @@ class BlurManager {
     // MARK: - Properties
     let setting = SettingObservable()
 
-    private var blurWindows: [NSScreen: NSWindow] = [:]
+    // Multi-layer system: stack of frost layers per screen
+    private var frostLayers: [NSScreen: [FrostLayer]] = [:]
     private var cancellableSet: Set<AnyCancellable> = []
 
-    // Track current focused window for animation
+    // Track current focused window
     private var currentFocusedWindowNumber: Int = 0
-    private var currentFocusedWindowFrame: CGRect = .zero
-    private var isAnimating = false
     private var isRecoveringFromSpaceChange = false
     private var updateRetryCount = 0
     private let maxUpdateRetries = 3
     private var pendingBlurWorkItem: DispatchWorkItem?
 
-    // Track hole layers for cleanup
-    private var activeHoleLayers: [CALayer] = []
-
     // Defrost multiplier: 1.0 = normal, 0.0 = fully defrosted (invisible)
-    // This is independent of the main blur logic and just multiplies the final opacity
     private var defrostMultiplier: CGFloat = 1.0
 
     // MARK: - Init
@@ -98,17 +108,13 @@ class BlurManager {
     // MARK: - Public Methods
 
     func blur(runningApplication: NSRunningApplication?, withDelay: Bool = true) {
-        print("👆 [Click] blur() called, app: \(runningApplication?.localizedName ?? "nil")")
-
         guard setting.isEnabled else {
-            print("👆 [Click] Blur disabled, hiding")
-            hideBlur(animated: true)
+            hideAllLayers(animated: true)
             return
         }
 
-        // Skip if recovering from space change - let the scheduled recovery complete
+        // Skip if recovering from space change
         if isRecoveringFromSpaceChange {
-            print("👆 [Click] BLOCKED - recovering from space change")
             return
         }
 
@@ -116,21 +122,14 @@ class BlurManager {
         if let bundle = runningApplication?.bundleIdentifier, bundle == "com.apple.finder" {
             let finderWindows = getWindowInfos().filter { $0.ownerName == "Finder" }
             if finderWindows.isEmpty {
-                print("👆 [Click] Empty desktop, hiding blur")
-                hideBlur(animated: true)
+                hideAllLayers(animated: true)
                 return
             }
         }
 
-        // Cancel any pending blur update (debouncing)
+        // Debounce
         pendingBlurWorkItem?.cancel()
-
-        // Use different delays:
-        // - withDelay: true (workspace notification, potential Mission Control) → 0.25s
-        // - withDelay: false (direct click, normal use) → 0.05s
-        // The debouncing ensures that if both fire (Mission Control), the longer delay wins
         let delay = withDelay ? 0.25 : 0.05
-        print("👆 [Click] Scheduling updateBlur in \(delay)s (withDelay: \(withDelay))")
 
         let workItem = DispatchWorkItem { [weak self] in
             self?.updateBlur()
@@ -140,138 +139,43 @@ class BlurManager {
     }
 
     func toggleBlur(isEnabled: Bool) {
-        // Cancel any ongoing animations and cleanup
-        cancelAnimations()
-
-        // Reset defrost state on manual toggle (clears any shake-to-defrost state)
         defrostMultiplier = 1.0
 
         if isEnabled {
-            // Reset state so show animation triggers
             currentFocusedWindowNumber = 0
-            currentFocusedWindowFrame = .zero
             updateBlur()
         } else {
-            hideBlur(animated: true)
+            hideAllLayers(animated: true)
         }
     }
 
-    /// Check if currently in defrosted state (multiplier < 1)
     var isDefrosted: Bool {
         return defrostMultiplier < 1.0
     }
 
-    /// Reset defrost state immediately (used when user manually toggles blur)
     func resetDefrost() {
         defrostMultiplier = 1.0
     }
 
-    /// Compute effective alpha by multiplying base alpha with defrost multiplier
-    private func effectiveAlpha(for baseAlpha: CGFloat) -> CGFloat {
-        return baseAlpha * defrostMultiplier
-    }
-
-    /// Defrost (shake) animates the defrost multiplier from current → 0
-    /// Uses a quick 0.5s animation for responsive feel
     func defrost() {
-        print("❄️ [Defrost] Starting defrost animation")
         animateDefrostMultiplier(to: 0.0, duration: 0.5)
     }
 
-    /// Refrost animates the defrost multiplier from current → 1
-    /// Uses the user's Transition duration setting for the full animation
     func refrost() {
         let duration = setting.transitionDuration.rawValue
-        print("🔥 [Refrost] Starting refrost animation with duration: \(duration)s")
         animateDefrostMultiplier(to: 1.0, duration: duration)
     }
 
-    /// Animate the defrost multiplier and update all blur window opacities accordingly
-    private func animateDefrostMultiplier(to targetMultiplier: CGFloat, duration: Double) {
-        let baseAlpha = setting.blurMode.targetAlpha
-        let targetAlpha = baseAlpha * targetMultiplier
-
-        NSAnimationContext.runAnimationGroup({ context in
-            context.duration = duration
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            context.allowsImplicitAnimation = true
-
-            for (_, window) in self.blurWindows {
-                window.contentView?.animator().alphaValue = targetAlpha
-            }
-        }, completionHandler: { [weak self] in
-            self?.defrostMultiplier = targetMultiplier
-            print("❄️ [Defrost] Animation complete, multiplier now: \(targetMultiplier)")
-        })
-
-        // Update multiplier immediately for calculations (animation handles visual)
-        defrostMultiplier = targetMultiplier
-    }
-
-    private func cancelAnimations() {
-        isAnimating = false
-
-        // Remove any active hole layers
-        for holeLayer in activeHoleLayers {
-            // Capture current visual opacity before removing animation
-            let currentOpacity = holeLayer.presentation()?.opacity ?? holeLayer.opacity
-            holeLayer.removeAllAnimations()
-            holeLayer.opacity = currentOpacity
-            holeLayer.removeFromSuperlayer()
-        }
-        activeHoleLayers.removeAll()
-
-        // Capture presentation values and restore proper masks
-        for (_, window) in blurWindows {
-            guard let layer = window.contentView?.layer else { continue }
-
-            // Capture current visual opacity BEFORE removing animation
-            // This prevents the snap-to-model-value problem
-            let currentOpacity = layer.presentation()?.opacity ?? layer.opacity
-
-            layer.removeAllAnimations()
-
-            // Set model value to where animation was visually
-            layer.opacity = currentOpacity
-            window.contentView?.alphaValue = CGFloat(currentOpacity)
-
-            // Restore proper mask based on mode
-            if setting.blurMode == .fog {
-                applyGradientMask(to: layer)
-            } else {
-                layer.mask = nil
-            }
-        }
-    }
-}
-
-// MARK: - Blur Window Management
-
-extension BlurManager {
+    // MARK: - Core Multi-Layer Logic
 
     private func updateBlur() {
-        print("🔍 [Update] updateBlur() called")
-
-        guard setting.isEnabled else {
-            print("🔍 [Update] Blur disabled, exiting")
-            return
-        }
-
-        // Cancel any ongoing animation and proceed (don't block)
-        if isAnimating {
-            print("🔍 [Update] Canceling ongoing animation")
-            cancelAnimations()
-        }
-
-        ensureBlurWindowsExist()
+        guard setting.isEnabled else { return }
 
         let windowInfos = getWindowInfos()
         guard let frontWindow = windowInfos.first else {
-            print("🔍 [Update] No front window found")
-            // Retry if we're in a transition state (Mission Control exit, etc.)
+            // Retry if in transition state
             if updateRetryCount < maxUpdateRetries {
                 updateRetryCount += 1
-                print("🔍 [Update] Scheduling retry \(updateRetryCount)/\(maxUpdateRetries)")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
                     self?.updateBlur()
                 }
@@ -281,178 +185,69 @@ extension BlurManager {
             return
         }
 
-        // Reset retry count on success
         updateRetryCount = 0
-
         let newFocusedWindowNumber = frontWindow.number
-        let newFocusedWindowFrame = frontWindow.bounds ?? .zero
 
-        print("🔍 [Update] Front window: \(frontWindow.ownerName ?? "?"), number: \(newFocusedWindowNumber)")
-        print("🔍 [Update] Window frame: \(newFocusedWindowFrame)")
-        print("🔍 [Update] Current tracked: \(currentFocusedWindowNumber)")
-
-        // Check if focused window changed
-        if currentFocusedWindowNumber != newFocusedWindowNumber && currentFocusedWindowNumber != 0 {
-            // Window changed - animate with snow burial effect
-            print("🔍 [Update] Window CHANGED - animating switch")
-            let oldWindowFrame = currentFocusedWindowFrame
+        if currentFocusedWindowNumber != newFocusedWindowNumber {
+            // Window changed - crossfade layers
+            transitionToWindow(newFocusedWindowNumber)
             currentFocusedWindowNumber = newFocusedWindowNumber
-            currentFocusedWindowFrame = newFocusedWindowFrame
-            animateWindowSwitch(to: newFocusedWindowNumber, oldWindowFrame: oldWindowFrame)
-        } else {
-            // First time or same window - just show
-            let shouldAnimate = currentFocusedWindowNumber == 0
-            print("🔍 [Update] \(shouldAnimate ? "FIRST TIME" : "SAME WINDOW") - showing blur (animated: \(shouldAnimate))")
+        } else if currentFocusedWindowNumber == 0 {
+            // First time - just show
             currentFocusedWindowNumber = newFocusedWindowNumber
-            currentFocusedWindowFrame = newFocusedWindowFrame
-            orderBlurWindows(below: newFocusedWindowNumber)
-            showBlur(animated: shouldAnimate)
+            showInitialLayer(below: newFocusedWindowNumber)
         }
+        // Same window - do nothing
     }
 
-    private func animateWindowSwitch(to newWindowNumber: Int, oldWindowFrame: CGRect) {
-        isAnimating = true
+    /// Create initial layer when frost first appears
+    private func showInitialLayer(below windowNumber: Int) {
+        let targetAlpha = effectiveAlpha(for: setting.blurMode.targetAlpha)
         let duration = setting.transitionDuration.rawValue
 
-        // Reorder blur windows below the new focused window
-        orderBlurWindows(below: newWindowNumber)
+        for screen in NSScreen.screens {
+            // Create new layer
+            let layer = createFrostLayer(for: screen, below: windowNumber)
 
-        // Animate snow burial effect on each screen
-        for (screen, blurWindow) in blurWindows {
-            guard let contentView = blurWindow.contentView,
-                  let layer = contentView.layer else { continue }
+            if frostLayers[screen] == nil {
+                frostLayers[screen] = []
+            }
+            frostLayers[screen]?.append(layer)
 
-            // Convert old window frame to view coordinates
-            let holeRect = convertToViewCoordinates(windowFrame: oldWindowFrame, screen: screen)
-
-            // Skip if hole rect doesn't intersect this screen
-            guard holeRect.intersects(contentView.bounds) else { continue }
-
-            // Show blur at effective alpha (respects defrost multiplier)
-            contentView.alphaValue = effectiveAlpha(for: setting.blurMode.targetAlpha)
-
-            // Animate the hole being filled (snow burial)
-            animateHoleFilling(on: layer, holeRect: holeRect, duration: duration)
+            // Animate in
+            animateLayerOpacity(layer, to: targetAlpha, duration: duration)
         }
     }
 
-    /// Shared hole animation that works for both full and ambient modes
-    private func animateHoleFilling(on layer: CALayer, holeRect: CGRect, duration: Double) {
-        // Create a mask container
-        let maskContainer = CALayer()
-        maskContainer.frame = layer.bounds
+    /// Crossfade: new layer fades in, all existing layers fade out
+    private func transitionToWindow(_ newWindowNumber: Int) {
+        let targetAlpha = effectiveAlpha(for: setting.blurMode.targetAlpha)
+        let duration = setting.transitionDuration.rawValue
 
-        // Add base mask layer (solid for full, gradient for ambient)
-        let baseLayer = createBaseMask(frame: layer.bounds)
-        maskContainer.addSublayer(baseLayer)
-
-        // Add hole layer with destOut filter (cuts through the base)
-        let holeLayer = CALayer()
-        holeLayer.frame = holeRect
-        holeLayer.backgroundColor = NSColor.white.cgColor
-        holeLayer.cornerRadius = 10.0  // macOS window corner radius
-        holeLayer.compositingFilter = "destOut"
-        holeLayer.opacity = 1.0
-        maskContainer.addSublayer(holeLayer)
-
-        // Track for cleanup
-        activeHoleLayers.append(holeLayer)
-
-        // Apply the mask
-        layer.mask = maskContainer
-
-        // Animate hole layer opacity from 1 → 0 (hole fades, blur fills in)
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-
-        let animation = CABasicAnimation(keyPath: "opacity")
-        animation.fromValue = 1.0
-        animation.toValue = 0.0
-        animation.duration = duration
-        animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        animation.fillMode = .forwards
-        animation.isRemovedOnCompletion = false
-
-        CATransaction.setCompletionBlock { [weak self, weak layer] in
-            // Restore original mask (gradient for ambient, nil for full)
-            if self?.setting.blurMode == .fog {
-                self?.applyGradientMask(to: layer)
-            } else {
-                layer?.mask = nil
+        for screen in NSScreen.screens {
+            // Fade out ALL existing layers
+            if let existingLayers = frostLayers[screen] {
+                for layer in existingLayers {
+                    animateLayerOpacity(layer, to: 0.0, duration: duration) { [weak self] in
+                        self?.removeLayer(layer, from: screen)
+                    }
+                }
             }
 
-            // Cleanup
-            if let index = self?.activeHoleLayers.firstIndex(where: { $0 === holeLayer }) {
-                self?.activeHoleLayers.remove(at: index)
+            // Create and fade in new layer
+            let newLayer = createFrostLayer(for: screen, below: newWindowNumber)
+
+            if frostLayers[screen] == nil {
+                frostLayers[screen] = []
             }
-            self?.isAnimating = false
+            frostLayers[screen]?.append(newLayer)
 
-            // Re-order blur windows below current focused window to ensure proper layering
-            if let windowNumber = self?.currentFocusedWindowNumber, windowNumber != 0 {
-                self?.orderBlurWindows(below: windowNumber)
-            }
-        }
-
-        holeLayer.add(animation, forKey: "holeFade")
-        CATransaction.commit()
-    }
-
-    /// Creates base mask layer based on current mode
-    private func createBaseMask(frame: CGRect) -> CALayer {
-        if setting.blurMode == .fog {
-            // Gradient mask for ambient mode
-            let gradientLayer = CAGradientLayer()
-            gradientLayer.frame = frame
-            gradientLayer.colors = [
-                NSColor.white.cgColor,                              // Bottom: full blur
-                NSColor.white.cgColor,
-                NSColor.white.withAlphaComponent(0.8).cgColor,
-                NSColor.white.withAlphaComponent(0.4).cgColor,
-                NSColor.white.withAlphaComponent(0.1).cgColor,
-                NSColor.clear.cgColor                               // Top: clear
-            ]
-            gradientLayer.locations = [0.0, 0.40, 0.55, 0.67, 0.80, 1.0]
-            gradientLayer.startPoint = CGPoint(x: 0.5, y: 0)
-            gradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
-            return gradientLayer
-        } else {
-            // Solid white mask for full mode
-            let solidLayer = CALayer()
-            solidLayer.frame = frame
-            solidLayer.backgroundColor = NSColor.white.cgColor
-            return solidLayer
+            animateLayerOpacity(newLayer, to: targetAlpha, duration: duration)
         }
     }
 
-    private func convertToViewCoordinates(windowFrame: CGRect, screen: NSScreen) -> CGRect {
-        let screenFrame = screen.frame
-        let flippedY = screenFrame.maxY - windowFrame.maxY
-        return CGRect(
-            x: windowFrame.origin.x - screenFrame.origin.x,
-            y: flippedY,
-            width: windowFrame.width,
-            height: windowFrame.height
-        )
-    }
-
-    private func ensureBlurWindowsExist() {
-        let screens = NSScreen.screens
-
-        for screen in screens {
-            if blurWindows[screen] == nil {
-                blurWindows[screen] = createBlurWindow(for: screen)
-            }
-        }
-
-        // Remove windows for disconnected screens
-        let currentScreens = Set(screens)
-        for (screen, window) in blurWindows where !currentScreens.contains(screen) {
-            window.close()
-            blurWindows.removeValue(forKey: screen)
-        }
-    }
-
-    private func createBlurWindow(for screen: NSScreen) -> NSWindow {
+    /// Create a frost layer for a screen, ordered below a specific window
+    private func createFrostLayer(for screen: NSScreen, below windowNumber: Int) -> FrostLayer {
         let frame = screen.frame
 
         let window = NSWindow(
@@ -471,21 +266,104 @@ extension BlurManager {
         window.backgroundColor = .clear
         window.hasShadow = false
 
-        // Create blur content
         let contentView = createBlurView(frame: NSRect(origin: .zero, size: frame.size))
         window.contentView = contentView
-
-        // Start fully transparent
         contentView.alphaValue = 0.0
 
         window.setFrame(frame, display: true)
-
-        // CRITICAL: Make window visible immediately (required for animations to render)
-        // Use orderFrontRegardless() instead of makeKeyAndOrderFront() to avoid key window warnings
         window.orderFrontRegardless()
+        window.displayIfNeeded()
 
-        return window
+        // Order below target window
+        orderWindow(window, below: windowNumber)
+
+        let layer = FrostLayer(window: window, targetWindowNumber: windowNumber)
+        return layer
     }
+
+    private func orderWindow(_ window: NSWindow, below windowNumber: Int) {
+        let allWindows = CGWindowListCopyWindowInfo([.optionOnScreenOnly], CGWindowID(0)) as? [[String: Any]] ?? []
+        let targetExists = allWindows.contains { dict in
+            (dict[kCGWindowNumber as String] as? Int) == windowNumber
+        }
+
+        if targetExists {
+            window.order(.below, relativeTo: windowNumber)
+        } else {
+            window.orderBack(nil)
+        }
+    }
+
+    private func animateLayerOpacity(_ layer: FrostLayer, to targetOpacity: CGFloat, duration: Double, completion: (() -> Void)? = nil) {
+        layer.currentOpacity = targetOpacity
+
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = duration
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            context.allowsImplicitAnimation = true
+            layer.window.contentView?.animator().alphaValue = targetOpacity
+        }, completionHandler: {
+            completion?()
+        })
+    }
+
+    private func removeLayer(_ layer: FrostLayer, from screen: NSScreen) {
+        layer.window.contentView?.alphaValue = 0.0
+        layer.window.orderOut(nil)
+        layer.window.close()
+
+        if var layers = frostLayers[screen] {
+            layers.removeAll { $0.id == layer.id }
+            frostLayers[screen] = layers.isEmpty ? nil : layers
+        }
+    }
+
+    private func hideAllLayers(animated: Bool) {
+        let duration = animated ? setting.transitionDuration.rawValue : 0
+
+        for (screen, layers) in frostLayers {
+            for layer in layers {
+                if animated {
+                    animateLayerOpacity(layer, to: 0.0, duration: duration) { [weak self] in
+                        self?.removeLayer(layer, from: screen)
+                    }
+                } else {
+                    removeLayer(layer, from: screen)
+                }
+            }
+        }
+
+        if !animated {
+            frostLayers.removeAll()
+        }
+        currentFocusedWindowNumber = 0
+    }
+
+    // MARK: - Defrost
+
+    private func effectiveAlpha(for baseAlpha: CGFloat) -> CGFloat {
+        return baseAlpha * defrostMultiplier
+    }
+
+    private func animateDefrostMultiplier(to targetMultiplier: CGFloat, duration: Double) {
+        let baseAlpha = setting.blurMode.targetAlpha
+        let targetAlpha = baseAlpha * targetMultiplier
+
+        for (_, layers) in frostLayers {
+            for layer in layers {
+                NSAnimationContext.runAnimationGroup({ context in
+                    context.duration = duration
+                    context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                    context.allowsImplicitAnimation = true
+                    layer.window.contentView?.animator().alphaValue = targetAlpha * (layer.currentOpacity / baseAlpha)
+                })
+            }
+        }
+
+        defrostMultiplier = targetMultiplier
+    }
+
+    // MARK: - Blur View Creation
 
     private func createBlurView(frame: NSRect) -> NSVisualEffectView {
         let blurView = NSVisualEffectView(frame: frame)
@@ -495,14 +373,12 @@ extension BlurManager {
         blurView.state = .active
         blurView.alphaValue = 0.0
 
-        // Apply mode-specific configuration
         if setting.blurMode == .fog {
             if let layer = blurView.layer {
                 layer.backgroundColor = NSColor.white.withAlphaComponent(0.05).cgColor
             }
             applyGradientMask(to: blurView)
         } else if setting.blurMode == .frost {
-            // Add grain texture for glass effect
             if let layer = blurView.layer {
                 addGrainLayer(to: layer, frame: frame)
             }
@@ -515,14 +391,12 @@ extension BlurManager {
         let grainLayer = CALayer()
         grainLayer.frame = CGRect(origin: .zero, size: frame.size)
 
-        // Create noise image for grain effect
         if let noiseImage = createNoiseImage(size: CGSize(width: 200, height: 200)) {
             grainLayer.backgroundColor = NSColor(patternImage: noiseImage).cgColor
         }
 
-        grainLayer.opacity = 0.20  // Fixed 20% grain for glass effect
+        grainLayer.opacity = 0.20
         grainLayer.compositingFilter = "overlayBlendMode"
-
         layer.addSublayer(grainLayer)
     }
 
@@ -552,11 +426,6 @@ extension BlurManager {
 
     private func applyGradientMask(to view: NSView) {
         guard let layer = view.layer else { return }
-        applyGradientMask(to: layer)
-    }
-
-    private func applyGradientMask(to layer: CALayer?) {
-        guard let layer = layer else { return }
 
         let gradientLayer = CAGradientLayer()
         gradientLayer.frame = layer.bounds
@@ -576,91 +445,7 @@ extension BlurManager {
         layer.mask = gradientLayer
     }
 
-    private func orderBlurWindows(below windowNumber: Int) {
-        print("📐 [Order] Ordering blur windows below window #\(windowNumber)")
-
-        // Verify the target window exists
-        let allWindows = CGWindowListCopyWindowInfo([.optionOnScreenOnly], CGWindowID(0)) as? [[String: Any]] ?? []
-        let targetExists = allWindows.contains { dict in
-            (dict[kCGWindowNumber as String] as? Int) == windowNumber
-        }
-        print("📐 [Order] Target window exists: \(targetExists)")
-
-        for (screen, blurWindow) in blurWindows {
-            blurWindow.setFrame(screen.frame, display: false)
-
-            // Step 1: Ensure window is in the window server by bringing it front
-            blurWindow.orderFrontRegardless()
-
-            // Step 2: Force display to ensure it's rendered
-            blurWindow.displayIfNeeded()
-
-            // Step 3: Order below the target window (only if it exists)
-            if targetExists {
-                blurWindow.order(.below, relativeTo: windowNumber)
-            } else {
-                // Fallback: just keep it at back
-                blurWindow.orderBack(nil)
-            }
-
-            print("📐 [Order] Screen \(screen.localizedName): level \(blurWindow.level.rawValue), alpha \(blurWindow.contentView?.alphaValue ?? -1), visible: \(blurWindow.isVisible), onScreen: \(blurWindow.isOnActiveSpace)")
-        }
-    }
-
-    private func showBlur(animated: Bool) {
-        let baseAlpha = setting.blurMode.targetAlpha
-        let targetAlpha = effectiveAlpha(for: baseAlpha)
-
-        print("✨ [Show] showBlur(animated: \(animated)), base alpha: \(baseAlpha), effective: \(targetAlpha), defrostMultiplier: \(defrostMultiplier)")
-
-        if animated {
-            let duration = setting.transitionDuration.rawValue
-            print("✨ [Show] Animating over \(duration)s")
-
-            // Use NSAnimationContext instead of CABasicAnimation for better window server integration
-            NSAnimationContext.runAnimationGroup({ context in
-                context.duration = duration
-                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                context.allowsImplicitAnimation = true
-
-                for (_, window) in self.blurWindows {
-                    let currentAlpha = window.contentView?.alphaValue ?? 0
-                    print("✨ [Show] Animating from \(currentAlpha) to \(targetAlpha)")
-                    window.contentView?.animator().alphaValue = targetAlpha
-                }
-            })
-        } else {
-            print("✨ [Show] Setting alpha immediately to \(targetAlpha)")
-            for (_, window) in blurWindows {
-                window.contentView?.alphaValue = targetAlpha
-            }
-        }
-    }
-
-    private func hideBlur(animated: Bool, duration: Double? = nil) {
-        if animated {
-            let animDuration = duration ?? setting.transitionDuration.rawValue
-
-            NSAnimationContext.runAnimationGroup({ context in
-                context.duration = animDuration
-                context.timingFunction = CAMediaTimingFunction(name: .easeIn)
-                context.allowsImplicitAnimation = true
-
-                for (_, window) in self.blurWindows {
-                    window.contentView?.animator().alphaValue = 0.0
-                }
-            })
-        } else {
-            for (_, window) in blurWindows {
-                window.contentView?.alphaValue = 0.0
-            }
-        }
-    }
-}
-
-// MARK: - Window Info
-
-extension BlurManager {
+    // MARK: - Window Info
 
     private func getWindowInfos() -> [WindowInfo] {
         let options = CGWindowListOption([.excludeDesktopElements, .optionOnScreenOnly])
@@ -670,7 +455,6 @@ extension BlurManager {
 
         let ownPID = Int(ProcessInfo.processInfo.processIdentifier)
 
-        // System processes to ignore (these can appear as "frontmost" during Mission Control transitions)
         let systemProcessNames: Set<String> = [
             "Dock",
             "Control Center",
@@ -683,22 +467,16 @@ extension BlurManager {
         return windowsListInfo
             .map { WindowInfo(dict: $0) }
             .filter { info in
-                // Must be layer 0 (normal window level)
                 guard info.layer == 0 else { return false }
-                // Must not be our own app
                 guard info.ownerPID != ownPID else { return false }
-                // Must not be a system process that appears during transitions
                 if let ownerName = info.ownerName, systemProcessNames.contains(ownerName) {
                     return false
                 }
                 return true
             }
     }
-}
 
-// MARK: - Observers
-
-extension BlurManager {
+    // MARK: - Observers
 
     private func observeSettingChanged() {
         setting.$isEnabled
@@ -712,7 +490,7 @@ extension BlurManager {
             .receive(on: DispatchQueue.main)
             .dropFirst()
             .sink { [weak self] (_: BlurMode) in
-                self?.recreateBlurWindows()
+                self?.recreateAllLayers()
             }
             .store(in: &cancellableSet)
     }
@@ -725,7 +503,6 @@ extension BlurManager {
             object: nil
         )
 
-        // Observe space changes (Mission Control, desktop switching)
         NSWorkspace.shared.notificationCenter.addObserver(
             self,
             selector: #selector(spaceDidChange),
@@ -752,44 +529,30 @@ extension BlurManager {
     }
 
     @objc private func spaceDidChange(notification: Notification) {
-        print("🔄 [Mission Control] Space changed detected")
-
-        // Reset animation state after Mission Control/space switch
-        cancelAnimations()
+        // Reset state after space change
         currentFocusedWindowNumber = 0
-        currentFocusedWindowFrame = .zero
         isRecoveringFromSpaceChange = true
 
-        // Set blur to transparent so it can animate back in smoothly
-        for (_, window) in blurWindows {
-            window.contentView?.layer?.opacity = 0.0
-            window.contentView?.alphaValue = 0.0
+        // Hide all layers immediately
+        for (_, layers) in frostLayers {
+            for layer in layers {
+                layer.window.contentView?.alphaValue = 0.0
+            }
         }
 
-        print("🔄 [Mission Control] Scheduled recovery in 0.2s")
-
-        // Longer delay to let the system fully settle after Mission Control
+        // Recover after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-            print("🔄 [Mission Control] Recovery executing")
             self?.isRecoveringFromSpaceChange = false
             self?.updateBlur()
         }
     }
 
     @objc private func screensDidChange(notification: Notification) {
-        recreateBlurWindows()
+        recreateAllLayers()
     }
 
-    private func recreateBlurWindows() {
-        cancelAnimations()
-
-        for (_, window) in blurWindows {
-            window.contentView?.alphaValue = 0.0
-            window.close()
-        }
-        blurWindows.removeAll()
-        currentFocusedWindowNumber = 0
-
+    private func recreateAllLayers() {
+        hideAllLayers(animated: false)
         if setting.isEnabled {
             updateBlur()
         }

@@ -1,0 +1,75 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for commit count
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.app
+
+      - name: Set version from tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "Setting version to $VERSION (build $BUILD_NUMBER)"
+
+          # Update Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Frost/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" Frost/Info.plist
+
+      - name: Build Release
+        run: |
+          xcodebuild -scheme Frost -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Create DMG
+        run: |
+          create-dmg \
+            --volname "Frost" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "Frost.app" 150 185 \
+            --app-drop-link 450 185 \
+            "Frost-${{ env.VERSION }}.dmg" \
+            "build/Build/Products/Release/Frost.app"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Frost-${{ env.VERSION }}.dmg
+          body: |
+            ## Frost ${{ env.VERSION }}
+
+            **Focus on what matters.** ❄️
+
+            ### Installation
+            1. Download `Frost-${{ env.VERSION }}.dmg`
+            2. Open the DMG and drag Frost to Applications
+            3. Right-click → Open (first launch only)
+
+            ### Requirements
+            - macOS 14.0 (Sonoma) or later
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

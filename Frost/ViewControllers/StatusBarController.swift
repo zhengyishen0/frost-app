@@ -90,7 +90,7 @@ class StatusBarController {
             transitionItems[duration] = item
         }
 
-        let transitionMenuItem = NSMenuItem(title: "Transition", action: nil, keyEquivalent: "")
+        let transitionMenuItem = NSMenuItem(title: "Transition".localized, action: nil, keyEquivalent: "")
         transitionMenuItem.submenu = transitionMenu
 
         // Update checkmarks for transition duration
@@ -108,7 +108,7 @@ class StatusBarController {
 
         // Shake to Defrost toggle (checkbox)
         let shakeItem = NSMenuItem(
-            title: "Shake to Defrost",
+            title: "Shake to Defrost".localized,
             action: #selector(toggleCursorShake),
             keyEquivalent: ""
         )
@@ -126,7 +126,7 @@ class StatusBarController {
 
         // Start at Login toggle (checkbox)
         let startAtLoginItem = NSMenuItem(
-            title: "Start at Login",
+            title: "Start at Login".localized,
             action: #selector(toggleStartAtLogin),
             keyEquivalent: ""
         )
@@ -144,7 +144,7 @@ class StatusBarController {
         menu.addItem(NSMenuItem.separator())
 
         // About
-        let aboutItem = NSMenuItem(title: "About Frost", action: #selector(showAbout), keyEquivalent: "")
+        let aboutItem = NSMenuItem(title: "About Frost".localized, action: #selector(showAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
 
@@ -160,7 +160,7 @@ class StatusBarController {
         let containerView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 32))
 
         // Label
-        let label = NSTextField(labelWithString: "Enabled")
+        let label = NSTextField(labelWithString: "Enabled".localized)
         label.frame = NSRect(x: 16, y: 6, width: 100, height: 20)
         label.font = NSFont.systemFont(ofSize: 13)
         label.textColor = .labelColor
@@ -226,8 +226,8 @@ class StatusBarController {
 
         let segmentedControl = NSSegmentedControl(frame: NSRect(x: 16, y: 4, width: 168, height: 24))
         segmentedControl.segmentCount = 2
-        segmentedControl.setLabel("Frost", forSegment: 0)
-        segmentedControl.setLabel("Fog", forSegment: 1)
+        segmentedControl.setLabel("Frost".localized, forSegment: 0)
+        segmentedControl.setLabel("Fog".localized, forSegment: 1)
         segmentedControl.segmentStyle = .rounded
         segmentedControl.trackingMode = .selectOne
         segmentedControl.target = self

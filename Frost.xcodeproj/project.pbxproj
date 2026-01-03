@@ -68,6 +68,7 @@
 		1EFFF5CC2F085176002AF814 /* Frost.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Frost.entitlements; sourceTree = "<group>"; };
 		1EFFF5CD2F085176002AF814 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1EFFF5CE2F085176002AF814 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		1EFFF5CF2F085176002AF814 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		1EFFF5D12F085176002AF814 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1EFFF5D22F085176002AF814 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		1EFFF5D62F08517E002AF814 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -256,6 +257,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 08FF678023A9156A00EACD58;
 			packageReferences = (
@@ -330,6 +332,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				1EFFF5CE2F085176002AF814 /* en */,
+				1EFFF5CF2F085176002AF814 /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
