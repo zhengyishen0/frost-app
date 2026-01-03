@@ -89,7 +89,7 @@ struct LicenseView: View {
                         .padding(.top, 8)
 
                     Button(action: {
-                        if let url = URL(string: "https://buy.stripe.com/YOUR_STRIPE_LINK") {
+                        if let url = URL(string: "https://buy.stripe.com/00w14ndAA3hv2p8duv5EY04") {
                             NSWorkspace.shared.open(url)
                         }
                     }) {

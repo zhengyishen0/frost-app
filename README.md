@@ -9,6 +9,12 @@
 </p>
 
 <p align="center">
+	<a href="https://buy.stripe.com/00w14ndAA3hv2p8duv5EY04">
+		<img src="https://img.shields.io/badge/Purchase_License-$5-blue?style=for-the-badge" alt="Purchase License">
+	</a>
+</p>
+
+<p align="center">
 	<a href="https://github.com/zhengyishen0/frost-app/releases/latest">
 		<img src="https://img.shields.io/github/v/release/zhengyishen0/frost-app?style=flat-square&color=blue" alt="Latest Release">
 	</a>
@@ -17,9 +23,6 @@
 	</a>
 	<img src="https://img.shields.io/badge/macOS-14.0+-orange?style=flat-square" alt="macOS 14+">
 	<img src="https://img.shields.io/badge/lang-EN%20%7C%20%E4%B8%AD%E6%96%87-lightgrey?style=flat-square" alt="English & Chinese">
-	<a href="https://github.com/zhengyishen0/frost-app/blob/main/LICENSE">
-		<img src="https://img.shields.io/github/license/zhengyishen0/frost-app?style=flat-square" alt="License">
-	</a>
 </p>
 
 <p align="center">
@@ -59,17 +62,17 @@ Click the snowflake icon in your menu bar to:
 
 Shake your cursor anytime to temporarily see through the blur.
 
+## Activate License
+
+After purchase, you'll receive a license key. Enter it in:
+**Menu bar → Frost → Enter License**
+
 ## Requirements
 
 - macOS 14.0 (Sonoma) or later
 
-## Credits
+---
 
-| Project | Contribution |
-|---------|--------------|
-| [Blurred](https://github.com/dwarvesf/blurred) by Dwarves Foundation | Original codebase |
-| [Monocle](https://monocle.heyiam.dk/) by Dominik Kandravy | Inspiration for blur effect |
-
-## License
-
-MIT License © [Zhengyi Shen](https://github.com/zhengyishen0)
+<p align="center">
+	Made by <a href="https://x.com/ZhengyiShen">Zhengyi Shen</a>
+</p>
