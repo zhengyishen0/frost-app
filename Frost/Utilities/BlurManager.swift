@@ -91,13 +91,17 @@ class BlurManager {
     // MARK: - Public Methods
 
     func blur(runningApplication: NSRunningApplication?, withDelay: Bool = true) {
+        print("👆 [Click] blur() called, app: \(runningApplication?.localizedName ?? "nil")")
+
         guard setting.isEnabled else {
+            print("👆 [Click] Blur disabled, hiding")
             hideBlur(animated: true)
             return
         }
 
         // Skip if recovering from space change - let the scheduled recovery complete
         if isRecoveringFromSpaceChange {
+            print("👆 [Click] BLOCKED - recovering from space change")
             return
         }
 
@@ -105,12 +109,14 @@ class BlurManager {
         if let bundle = runningApplication?.bundleIdentifier, bundle == "com.apple.finder" {
             let finderWindows = getWindowInfos().filter { $0.ownerName == "Finder" }
             if finderWindows.isEmpty {
+                print("👆 [Click] Empty desktop, hiding blur")
                 hideBlur(animated: true)
                 return
             }
         }
 
         let delay = withDelay ? 0.05 : 0
+        print("👆 [Click] Scheduling updateBlur in \(delay)s")
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             self?.updateBlur()
         }
@@ -216,24 +222,37 @@ class BlurManager {
 extension BlurManager {
 
     private func updateBlur() {
-        guard setting.isEnabled else { return }
+        print("🔍 [Update] updateBlur() called")
+
+        guard setting.isEnabled else {
+            print("🔍 [Update] Blur disabled, exiting")
+            return
+        }
 
         // Cancel any ongoing animation and proceed (don't block)
         if isAnimating {
+            print("🔍 [Update] Canceling ongoing animation")
             cancelAnimations()
         }
 
         ensureBlurWindowsExist()
 
         let windowInfos = getWindowInfos()
-        guard let frontWindow = windowInfos.first else { return }
+        guard let frontWindow = windowInfos.first else {
+            print("🔍 [Update] No front window found")
+            return
+        }
 
         let newFocusedWindowNumber = frontWindow.number
         let newFocusedWindowFrame = frontWindow.bounds ?? .zero
 
+        print("🔍 [Update] Front window: \(frontWindow.ownerName ?? "?"), number: \(newFocusedWindowNumber)")
+        print("🔍 [Update] Current tracked: \(currentFocusedWindowNumber)")
+
         // Check if focused window changed
         if currentFocusedWindowNumber != newFocusedWindowNumber && currentFocusedWindowNumber != 0 {
             // Window changed - animate with snow burial effect
+            print("🔍 [Update] Window CHANGED - animating switch")
             let oldWindowFrame = currentFocusedWindowFrame
             currentFocusedWindowNumber = newFocusedWindowNumber
             currentFocusedWindowFrame = newFocusedWindowFrame
@@ -241,6 +260,7 @@ extension BlurManager {
         } else {
             // First time or same window - just show
             let shouldAnimate = currentFocusedWindowNumber == 0
+            print("🔍 [Update] \(shouldAnimate ? "FIRST TIME" : "SAME WINDOW") - showing blur (animated: \(shouldAnimate))")
             currentFocusedWindowNumber = newFocusedWindowNumber
             currentFocusedWindowFrame = newFocusedWindowFrame
             orderBlurWindows(below: newFocusedWindowNumber)
@@ -418,6 +438,10 @@ extension BlurManager {
 
         window.setFrame(frame, display: true)
 
+        // CRITICAL: Make window visible immediately (required for animations to render)
+        window.makeKeyAndOrderFront(nil)
+        window.orderBack(nil)
+
         return window
     }
 
@@ -511,6 +535,7 @@ extension BlurManager {
     }
 
     private func orderBlurWindows(below windowNumber: Int) {
+        print("📐 [Order] Ordering blur windows below window #\(windowNumber)")
         for (screen, blurWindow) in blurWindows {
             blurWindow.setFrame(screen.frame, display: false)
 
@@ -519,20 +544,37 @@ extension BlurManager {
 
             // Then order below the target window
             blurWindow.order(.below, relativeTo: windowNumber)
+
+            print("📐 [Order] Screen \(screen.localizedName): window level \(blurWindow.level.rawValue), alpha \(blurWindow.contentView?.alphaValue ?? -1)")
         }
     }
 
     private func showBlur(animated: Bool) {
         let targetAlpha = setting.blurMode.targetAlpha
 
+        print("✨ [Show] showBlur(animated: \(animated)), target alpha: \(targetAlpha)")
+
+        // CRITICAL: Ensure windows are visible before animating
+        for (_, window) in blurWindows {
+            if !window.isVisible {
+                print("✨ [Show] Making window visible")
+                window.makeKeyAndOrderFront(nil)
+                window.orderBack(nil)
+            }
+        }
+
         if animated {
             let duration = setting.transitionDuration.rawValue
+            print("✨ [Show] Animating over \(duration)s")
 
             for (_, window) in blurWindows {
                 guard let layer = window.contentView?.layer else { continue }
 
+                let fromAlpha = layer.presentation()?.opacity ?? layer.opacity
+                print("✨ [Show] Animating from \(fromAlpha) to \(targetAlpha)")
+
                 let animation = CABasicAnimation(keyPath: "opacity")
-                animation.fromValue = layer.opacity
+                animation.fromValue = fromAlpha
                 animation.toValue = Float(targetAlpha)
                 animation.duration = duration
                 animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
@@ -543,6 +585,7 @@ extension BlurManager {
                 window.contentView?.alphaValue = targetAlpha
             }
         } else {
+            print("✨ [Show] Setting alpha immediately to \(targetAlpha)")
             for (_, window) in blurWindows {
                 window.contentView?.alphaValue = targetAlpha
             }
@@ -649,6 +692,8 @@ extension BlurManager {
     }
 
     @objc private func spaceDidChange(notification: Notification) {
+        print("🔄 [Mission Control] Space changed detected")
+
         // Reset animation state after Mission Control/space switch
         cancelAnimations()
         currentFocusedWindowNumber = 0
@@ -661,8 +706,11 @@ extension BlurManager {
             window.contentView?.alphaValue = 0.0
         }
 
+        print("🔄 [Mission Control] Scheduled recovery in 0.2s")
+
         // Longer delay to let the system fully settle after Mission Control
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            print("🔄 [Mission Control] Recovery executing")
             self?.isRecoveringFromSpaceChange = false
             self?.updateBlur()
         }
