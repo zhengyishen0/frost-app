@@ -79,6 +79,7 @@ class BlurManager {
     private var isRecoveringFromSpaceChange = false
     private var updateRetryCount = 0
     private let maxUpdateRetries = 3
+    private var pendingBlurWorkItem: DispatchWorkItem?
 
     // Track hole layers for cleanup
     private var activeHoleLayers: [CALayer] = []
@@ -117,13 +118,21 @@ class BlurManager {
             }
         }
 
-        // Use delay to allow Mission Control exit animation to complete
-        // Mission Control animation is ~0.3s, so we wait 0.25s to get correct window size/position
-        let delay = withDelay ? 0.25 : 0.25
+        // Cancel any pending blur update (debouncing)
+        pendingBlurWorkItem?.cancel()
+
+        // Use different delays:
+        // - withDelay: true (workspace notification, potential Mission Control) → 0.25s
+        // - withDelay: false (direct click, normal use) → 0.05s
+        // The debouncing ensures that if both fire (Mission Control), the longer delay wins
+        let delay = withDelay ? 0.25 : 0.05
         print("👆 [Click] Scheduling updateBlur in \(delay)s (withDelay: \(withDelay))")
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+
+        let workItem = DispatchWorkItem { [weak self] in
             self?.updateBlur()
         }
+        pendingBlurWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
     }
 
     func toggleBlur(isEnabled: Bool) {
