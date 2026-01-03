@@ -69,16 +69,15 @@ jobs:
 
             ### Installation
 
-            **Option 1: Homebrew**
-            ```bash
-            brew tap zhengyishen0/frost
-            brew install --cask frost
-            ```
-
-            **Option 2: Direct Download**
+            **Download**
             1. Download `Frost-${{ env.VERSION }}.dmg`
             2. Open the DMG and drag Frost to Applications
             3. Right-click → Open (first launch only)
+
+            **Homebrew**
+            ```bash
+            brew install --cask zhengyishen0/frost/frost
+            ```
 
             ### Requirements
             - macOS 14.0 (Sonoma) or later
