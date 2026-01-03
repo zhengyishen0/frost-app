@@ -33,20 +33,20 @@ Frost applies a beautiful frosted blur to everything except the window you're wo
 
 | Feature | Description |
 |---------|-------------|
-| **Glass Mode** | Uniform frosted blur with subtle grain texture |
-| **Frost Mode** | Gradient blur: strong at bottom, subtle at top |
+| **Frost Mode** | Uniform frosted blur with subtle grain texture |
+| **Fog Mode** | Gradient blur: strong at bottom, subtle at top |
 | **Smooth Transitions** | 1s, 1.5s, or 2s fade animations |
 | **Shake to Defrost** | Shake your cursor to temporarily clear the blur |
 | **Defrost Delay** | Auto-restore blur after 3s, 4s, or 5s |
 | **Start at Login** | Launch Frost automatically when you log in |
 
-### Glass Mode
-
-A uniform frosted glass effect with subtle grain texture. Everything outside your focused window gets a consistent blur.
-
 ### Frost Mode
 
-A gradient blur effect:
+A uniform frosted blur effect with subtle grain texture. Everything outside your focused window gets a consistent blur—like ice crystals covering a winter window.
+
+### Fog Mode
+
+A gradient blur effect—like condensation settling on glass:
 - **Bottom**: Full blur (maximum focus)
 - **Top**: Subtle blur (peripheral awareness)
 
@@ -65,7 +65,7 @@ Perfect for keeping your dock and menu bar slightly visible while focusing on yo
 ## Usage
 
 1. Click the ❄️ snowflake icon in your menu bar
-2. Toggle between **Glass** and **Frost** modes
+2. Toggle between **Frost** and **Fog** modes
 3. Adjust transition speed and defrost delay as needed
 4. Shake your cursor to temporarily defrost
 

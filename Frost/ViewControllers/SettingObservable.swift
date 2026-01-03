@@ -35,7 +35,7 @@ final class SettingObservable: ObservableObject {
         }
     }
 
-    @Published var blurMode: BlurMode = BlurMode(rawValue: UserDefaults.blurMode) ?? .glass {
+    @Published var blurMode: BlurMode = BlurMode(rawValue: UserDefaults.blurMode) ?? .frost {
         didSet {
             UserDefaults.blurMode = blurMode.rawValue
         }

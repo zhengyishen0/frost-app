@@ -13,20 +13,20 @@ import Combine
 // MARK: - Enums
 
 enum BlurMode: Int {
-    case glass // Uniform frosted blur with grain texture (like frosted glass)
-    case frost // Gradient blur: strong at bottom, subtle at top
+    case frost // Uniform frosted blur (like ice crystals covering entire window)
+    case fog   // Gradient blur: strong at bottom, subtle at top (like condensation)
 
     var targetAlpha: CGFloat {
         switch self {
-        case .glass: return 0.75
-        case .frost: return 1.0
+        case .frost: return 0.75
+        case .fog: return 1.0
         }
     }
 
     var label: String {
         switch self {
-        case .glass: return "Glass"
         case .frost: return "Frost"
+        case .fog: return "Fog"
         }
     }
 }
@@ -84,6 +84,10 @@ class BlurManager {
     // Track hole layers for cleanup
     private var activeHoleLayers: [CALayer] = []
 
+    // Defrost multiplier: 1.0 = normal, 0.0 = fully defrosted (invisible)
+    // This is independent of the main blur logic and just multiplies the final opacity
+    private var defrostMultiplier: CGFloat = 1.0
+
     // MARK: - Init
     private init() {
         observeActiveWindowChanged()
@@ -139,6 +143,9 @@ class BlurManager {
         // Cancel any ongoing animations and cleanup
         cancelAnimations()
 
+        // Reset defrost state on manual toggle (clears any shake-to-defrost state)
+        defrostMultiplier = 1.0
+
         if isEnabled {
             // Reset state so show animation triggers
             currentFocusedWindowNumber = 0
@@ -149,48 +156,56 @@ class BlurManager {
         }
     }
 
-    /// Defrost (shake) uses fixed 1s transition, independent of user setting
+    /// Check if currently in defrosted state (multiplier < 1)
+    var isDefrosted: Bool {
+        return defrostMultiplier < 1.0
+    }
+
+    /// Reset defrost state immediately (used when user manually toggles blur)
+    func resetDefrost() {
+        defrostMultiplier = 1.0
+    }
+
+    /// Compute effective alpha by multiplying base alpha with defrost multiplier
+    private func effectiveAlpha(for baseAlpha: CGFloat) -> CGFloat {
+        return baseAlpha * defrostMultiplier
+    }
+
+    /// Defrost (shake) animates the defrost multiplier from current → 0
+    /// Uses a quick 0.5s animation for responsive feel
     func defrost() {
-        cancelAnimations()
-        hideBlur(animated: true, duration: 1.0)
+        print("❄️ [Defrost] Starting defrost animation")
+        animateDefrostMultiplier(to: 0.0, duration: 0.5)
     }
 
-    /// Refrost after shake delay uses fixed 1s transition
+    /// Refrost animates the defrost multiplier from current → 1
+    /// Uses the user's Transition duration setting for the full animation
     func refrost() {
-        cancelAnimations()
-        currentFocusedWindowNumber = 0
-        currentFocusedWindowFrame = .zero
-        showBlurForDefrost()
+        let duration = setting.transitionDuration.rawValue
+        print("🔥 [Refrost] Starting refrost animation with duration: \(duration)s")
+        animateDefrostMultiplier(to: 1.0, duration: duration)
     }
 
-    private func showBlurForDefrost() {
-        guard setting.isEnabled else { return }
+    /// Animate the defrost multiplier and update all blur window opacities accordingly
+    private func animateDefrostMultiplier(to targetMultiplier: CGFloat, duration: Double) {
+        let baseAlpha = setting.blurMode.targetAlpha
+        let targetAlpha = baseAlpha * targetMultiplier
 
-        ensureBlurWindowsExist()
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = duration
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            context.allowsImplicitAnimation = true
 
-        let windowInfos = getWindowInfos()
-        guard let frontWindow = windowInfos.first else { return }
+            for (_, window) in self.blurWindows {
+                window.contentView?.animator().alphaValue = targetAlpha
+            }
+        }, completionHandler: { [weak self] in
+            self?.defrostMultiplier = targetMultiplier
+            print("❄️ [Defrost] Animation complete, multiplier now: \(targetMultiplier)")
+        })
 
-        currentFocusedWindowNumber = frontWindow.number
-        currentFocusedWindowFrame = frontWindow.bounds ?? .zero
-        orderBlurWindows(below: frontWindow.number)
-
-        // Use fixed 1s duration for defrost
-        let targetAlpha = setting.blurMode.targetAlpha
-        for (_, window) in blurWindows {
-            guard let layer = window.contentView?.layer else { continue }
-
-            let animation = CABasicAnimation(keyPath: "opacity")
-            animation.fromValue = layer.opacity
-            animation.toValue = Float(targetAlpha)
-            animation.duration = 1.0  // Fixed 1s for defrost
-            animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            animation.fillMode = .forwards
-            animation.isRemovedOnCompletion = false
-
-            layer.add(animation, forKey: "showBlur")
-            window.contentView?.alphaValue = targetAlpha
-        }
+        // Update multiplier immediately for calculations (animation handles visual)
+        defrostMultiplier = targetMultiplier
     }
 
     private func cancelAnimations() {
@@ -221,7 +236,7 @@ class BlurManager {
             window.contentView?.alphaValue = CGFloat(currentOpacity)
 
             // Restore proper mask based on mode
-            if setting.blurMode == .frost {
+            if setting.blurMode == .fog {
                 applyGradientMask(to: layer)
             } else {
                 layer.mask = nil
@@ -313,8 +328,8 @@ extension BlurManager {
             // Skip if hole rect doesn't intersect this screen
             guard holeRect.intersects(contentView.bounds) else { continue }
 
-            // Show blur at target alpha
-            contentView.alphaValue = setting.blurMode.targetAlpha
+            // Show blur at effective alpha (respects defrost multiplier)
+            contentView.alphaValue = effectiveAlpha(for: setting.blurMode.targetAlpha)
 
             // Animate the hole being filled (snow burial)
             animateHoleFilling(on: layer, holeRect: holeRect, duration: duration)
@@ -360,7 +375,7 @@ extension BlurManager {
 
         CATransaction.setCompletionBlock { [weak self, weak layer] in
             // Restore original mask (gradient for ambient, nil for full)
-            if self?.setting.blurMode == .frost {
+            if self?.setting.blurMode == .fog {
                 self?.applyGradientMask(to: layer)
             } else {
                 layer?.mask = nil
@@ -384,7 +399,7 @@ extension BlurManager {
 
     /// Creates base mask layer based on current mode
     private func createBaseMask(frame: CGRect) -> CALayer {
-        if setting.blurMode == .frost {
+        if setting.blurMode == .fog {
             // Gradient mask for ambient mode
             let gradientLayer = CAGradientLayer()
             gradientLayer.frame = frame
@@ -481,12 +496,12 @@ extension BlurManager {
         blurView.alphaValue = 0.0
 
         // Apply mode-specific configuration
-        if setting.blurMode == .frost {
+        if setting.blurMode == .fog {
             if let layer = blurView.layer {
                 layer.backgroundColor = NSColor.white.withAlphaComponent(0.05).cgColor
             }
             applyGradientMask(to: blurView)
-        } else if setting.blurMode == .glass {
+        } else if setting.blurMode == .frost {
             // Add grain texture for glass effect
             if let layer = blurView.layer {
                 addGrainLayer(to: layer, frame: frame)
@@ -593,9 +608,10 @@ extension BlurManager {
     }
 
     private func showBlur(animated: Bool) {
-        let targetAlpha = setting.blurMode.targetAlpha
+        let baseAlpha = setting.blurMode.targetAlpha
+        let targetAlpha = effectiveAlpha(for: baseAlpha)
 
-        print("✨ [Show] showBlur(animated: \(animated)), target alpha: \(targetAlpha)")
+        print("✨ [Show] showBlur(animated: \(animated)), base alpha: \(baseAlpha), effective: \(targetAlpha), defrostMultiplier: \(defrostMultiplier)")
 
         if animated {
             let duration = setting.transitionDuration.rawValue

@@ -33,13 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    let eventMonitor = EventMonitor(mask: .leftMouseDown) { _ in
-        // Trigger blur immediately on mouse down (not up)
-        BlurManager.sharedInstance.blur(
-            runningApplication: NSWorkspace.shared.frontmostApplication,
-            withDelay: false
-        )
-    }
+    var eventMonitor: EventMonitor!
 
     // MARK: - App Lifecycle
 
@@ -49,7 +43,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         openPrefWindowIfNeeded()
         setupHotKey()
         setupCursorShakeDetector()
+        setupEventMonitor()
+    }
+
+    func setupEventMonitor() {
+        // Track mouseDown, mouseUp, and mouseDragged to handle all interactions
+        eventMonitor = EventMonitor(mask: [.leftMouseDown, .leftMouseUp, .leftMouseDragged]) { [weak self] event in
+            // Reset defrost timer on any mouse activity if currently defrosted
+            if BlurManager.sharedInstance.isDefrosted {
+                self?.resetDefrostTimerOnActivity()
+            }
+
+            // Only trigger blur update on mouse down (start of interaction)
+            if event?.type == .leftMouseDown {
+                BlurManager.sharedInstance.blur(
+                    runningApplication: NSWorkspace.shared.frontmostApplication,
+                    withDelay: false
+                )
+            }
+        }
         eventMonitor.start()
+    }
+
+    /// Reset the defrost timer when user interacts with windows while defrosted
+    private func resetDefrostTimerOnActivity() {
+        guard wasEnabledBeforeShake else { return }
+
+        // Cancel existing timer and start a new one
+        shakeRestoreTimer?.invalidate()
+        startShakeRestoreTimer()
+        print("🔄 [Defrost] Timer reset due to window activity")
     }
 
     func applicationDidChangeScreenParameters(_ notification: Notification) {
@@ -82,6 +105,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.cursorShakeDetector.setEnabled(enabled)
             }
             .store(in: &cancellableSet)
+
+        // Reset shake state when blur is manually toggled
+        BlurManager.sharedInstance.setting.$isEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.resetShakeState()
+            }
+            .store(in: &cancellableSet)
+    }
+
+    private func resetShakeState() {
+        shakeRestoreTimer?.invalidate()
+        shakeRestoreTimer = nil
+        wasEnabledBeforeShake = false
     }
 
     // MARK: - Shake Handling
@@ -107,12 +144,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func startShakeRestoreTimer() {
-        let delay = BlurManager.sharedInstance.setting.shakeRestoreDelay.rawValue
+        // Hardcoded 2 second inactivity delay before refrost
+        let delay: TimeInterval = 2.0
 
         shakeRestoreTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
             guard let self = self, self.wasEnabledBeforeShake else { return }
 
-            // Restore blur (refrost)
+            // Restore blur (refrost) with full transition animation
             BlurManager.sharedInstance.refrost()
             self.wasEnabledBeforeShake = false
         }

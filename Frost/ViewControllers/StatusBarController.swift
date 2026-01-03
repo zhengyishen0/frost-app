@@ -63,26 +63,13 @@ class StatusBarController {
         let menu = NSMenu()
         let setting = BlurManager.sharedInstance.setting
 
-        // Enable/Disable toggle
-        let enableButton = NSMenuItem(
-            title: setting.isEnabled ? "Disable".localized : "Enable".localized,
-            action: #selector(toggleEnable),
-            keyEquivalent: "E"
-        )
-        enableButton.target = self
-
-        // Observe enable state changes
-        setting.$isEnabled
-            .receive(on: DispatchQueue.main)
-            .sink { [weak enableButton] isEnabled in
-                enableButton?.title = isEnabled ? "Disable".localized : "Enable".localized
-            }
-            .store(in: &cancellableSet)
-
-        menu.addItem(enableButton)
+        // Power switch toggle (green macOS-style switch)
+        let powerSwitchItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        powerSwitchItem.view = createPowerSwitchView(setting: setting)
+        menu.addItem(powerSwitchItem)
         menu.addItem(NSMenuItem.separator())
 
-        // Mode toggle - tab style: [ Glass | Frost ]
+        // Mode toggle - tab style: [ Frost | Fog ]
         let modeItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
         modeItem.view = createModeToggleView(setting: setting)
         menu.addItem(modeItem)
@@ -119,7 +106,7 @@ class StatusBarController {
         menu.addItem(transitionMenuItem)
         menu.addItem(NSMenuItem.separator())
 
-        // Shake to Defrost toggle
+        // Shake to Defrost toggle (checkbox)
         let shakeItem = NSMenuItem(
             title: "Shake to Defrost",
             action: #selector(toggleCursorShake),
@@ -137,38 +124,7 @@ class StatusBarController {
 
         menu.addItem(shakeItem)
 
-        // Defrost Delay submenu
-        let shakeDelayMenu = NSMenu()
-        var shakeDelayItems: [ShakeRestoreDelay: NSMenuItem] = [:]
-
-        for delay in ShakeRestoreDelay.allCases {
-            let item = NSMenuItem(
-                title: delay.label,
-                action: #selector(setShakeRestoreDelay(_:)),
-                keyEquivalent: ""
-            )
-            item.target = self
-            item.representedObject = delay
-            shakeDelayMenu.addItem(item)
-            shakeDelayItems[delay] = item
-        }
-
-        let shakeDelayMenuItem = NSMenuItem(title: "Defrost Delay", action: nil, keyEquivalent: "")
-        shakeDelayMenuItem.submenu = shakeDelayMenu
-
-        setting.$shakeRestoreDelay
-            .receive(on: DispatchQueue.main)
-            .sink { currentDelay in
-                for (delay, item) in shakeDelayItems {
-                    item.state = delay == currentDelay ? .on : .off
-                }
-            }
-            .store(in: &cancellableSet)
-
-        menu.addItem(shakeDelayMenuItem)
-        menu.addItem(NSMenuItem.separator())
-
-        // Start at Login toggle
+        // Start at Login toggle (checkbox)
         let startAtLoginItem = NSMenuItem(
             title: "Start at Login",
             action: #selector(toggleStartAtLogin),
@@ -198,18 +154,52 @@ class StatusBarController {
         return menu
     }
 
+    // MARK: - Power Switch View
+
+    private func createPowerSwitchView(setting: SettingObservable) -> NSView {
+        let containerView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 32))
+
+        // Label
+        let label = NSTextField(labelWithString: "Enabled")
+        label.frame = NSRect(x: 16, y: 6, width: 100, height: 20)
+        label.font = NSFont.systemFont(ofSize: 13)
+        label.textColor = .labelColor
+        containerView.addSubview(label)
+
+        // Green toggle switch
+        let toggle = NSSwitch(frame: NSRect(x: 150, y: 4, width: 40, height: 24))
+        toggle.state = setting.isEnabled ? .on : .off
+        toggle.target = self
+        toggle.action = #selector(powerSwitchChanged(_:))
+        containerView.addSubview(toggle)
+
+        // Observe changes
+        setting.$isEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak toggle] isEnabled in
+                toggle?.state = isEnabled ? .on : .off
+            }
+            .store(in: &cancellableSet)
+
+        return containerView
+    }
+
+    @objc private func powerSwitchChanged(_ sender: NSSwitch) {
+        BlurManager.sharedInstance.setting.isEnabled = (sender.state == .on)
+    }
+
     // MARK: - Actions
 
     @objc private func toggleEnable() {
         BlurManager.sharedInstance.setting.isEnabled.toggle()
     }
 
-    @objc private func setBlurModeGlass() {
-        BlurManager.sharedInstance.setting.blurMode = .glass
-    }
-
     @objc private func setBlurModeFrost() {
         BlurManager.sharedInstance.setting.blurMode = .frost
+    }
+
+    @objc private func setBlurModeFog() {
+        BlurManager.sharedInstance.setting.blurMode = .fog
     }
 
     @objc private func setTransitionDuration(_ sender: NSMenuItem) {
@@ -219,11 +209,6 @@ class StatusBarController {
 
     @objc private func toggleCursorShake() {
         BlurManager.sharedInstance.setting.cursorShakeEnabled.toggle()
-    }
-
-    @objc private func setShakeRestoreDelay(_ sender: NSMenuItem) {
-        guard let delay = sender.representedObject as? ShakeRestoreDelay else { return }
-        BlurManager.sharedInstance.setting.shakeRestoreDelay = delay
     }
 
     @objc private func toggleStartAtLogin() {
@@ -241,21 +226,21 @@ class StatusBarController {
 
         let segmentedControl = NSSegmentedControl(frame: NSRect(x: 16, y: 4, width: 168, height: 24))
         segmentedControl.segmentCount = 2
-        segmentedControl.setLabel("Glass", forSegment: 0)
-        segmentedControl.setLabel("Frost", forSegment: 1)
+        segmentedControl.setLabel("Frost", forSegment: 0)
+        segmentedControl.setLabel("Fog", forSegment: 1)
         segmentedControl.segmentStyle = .rounded
         segmentedControl.trackingMode = .selectOne
         segmentedControl.target = self
         segmentedControl.action = #selector(modeSegmentChanged(_:))
 
         // Set initial selection
-        segmentedControl.selectedSegment = setting.blurMode == .glass ? 0 : 1
+        segmentedControl.selectedSegment = setting.blurMode == .frost ? 0 : 1
 
         // Observe changes
         setting.$blurMode
             .receive(on: DispatchQueue.main)
             .sink { [weak segmentedControl] mode in
-                segmentedControl?.selectedSegment = mode == .glass ? 0 : 1
+                segmentedControl?.selectedSegment = mode == .frost ? 0 : 1
             }
             .store(in: &cancellableSet)
 
@@ -264,6 +249,6 @@ class StatusBarController {
     }
 
     @objc private func modeSegmentChanged(_ sender: NSSegmentedControl) {
-        BlurManager.sharedInstance.setting.blurMode = sender.selectedSegment == 0 ? .glass : .frost
+        BlurManager.sharedInstance.setting.blurMode = sender.selectedSegment == 0 ? .frost : .fog
     }
 }
