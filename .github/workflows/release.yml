@@ -30,13 +30,57 @@ jobs:
           /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Frost/Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" Frost/Info.plist
 
-      - name: Build Release
+      - name: Install certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          xcodebuild -scheme Frost -configuration Release \
-            -derivedDataPath build \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Decode certificate
+          echo -n "$CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate
+          security import $CERTIFICATE_PATH -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Build and Archive
+        run: |
+          xcodebuild clean archive \
+            -scheme Frost \
+            -configuration Release \
+            -archivePath build/Frost.xcarchive \
+            CODE_SIGN_IDENTITY="Developer ID Application: Zhengyi Shen (L926GNJA8S)" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=L926GNJA8S
+
+      - name: Notarize app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          TEAM_ID: L926GNJA8S
+        run: |
+          # Create zip for notarization
+          ditto -c -k --keepParent build/Frost.xcarchive/Products/Applications/Frost.app build/Frost.zip
+
+          # Submit for notarization
+          xcrun notarytool submit build/Frost.zip \
+            --apple-id "$APPLE_ID" \
+            --team-id "$TEAM_ID" \
+            --password "$APPLE_ID_PASSWORD" \
+            --wait
+
+          # Staple the ticket
+          xcrun stapler staple build/Frost.xcarchive/Products/Applications/Frost.app
 
       - name: Install create-dmg
         run: brew install create-dmg
@@ -51,7 +95,26 @@ jobs:
             --icon "Frost.app" 150 185 \
             --app-drop-link 450 185 \
             "Frost-${{ env.VERSION }}.dmg" \
-            "build/Build/Products/Release/Frost.app"
+            "build/Frost.xcarchive/Products/Applications/Frost.app"
+
+      - name: Sign and Notarize DMG
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          TEAM_ID: L926GNJA8S
+        run: |
+          # Sign DMG
+          codesign --force --sign "Developer ID Application: Zhengyi Shen (L926GNJA8S)" "Frost-${{ env.VERSION }}.dmg"
+
+          # Notarize DMG
+          xcrun notarytool submit "Frost-${{ env.VERSION }}.dmg" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$TEAM_ID" \
+            --password "$APPLE_ID_PASSWORD" \
+            --wait
+
+          # Staple DMG
+          xcrun stapler staple "Frost-${{ env.VERSION }}.dmg"
 
       - name: Calculate DMG SHA256
         run: |
@@ -72,7 +135,7 @@ jobs:
             **Download**
             1. Download `Frost-${{ env.VERSION }}.dmg`
             2. Open the DMG and drag Frost to Applications
-            3. Right-click → Open (first launch only)
+            3. Launch Frost from Applications
 
             **Homebrew**
             ```bash
